@@ -398,11 +398,11 @@ public final class VloxScreen extends Screen {
 			}
 			String label = Ui.fit(this.font, feature.label, row.width() - 12);
 			int labelX = row.x() + (row.width() - this.font.width(label)) / 2;
-			Ui.text(graphics, this.font, label, labelX, row.y() + 25, Ui.TEXT);
+			Ui.text(graphics, this.font, label, labelX, row.y() + 22, Ui.TEXT);
 			if (VloxConfig.flag(Features.MENU_DESCRIPTIONS) && !VloxConfig.flag(Features.MENU_COMPACT)) {
 				String description = Ui.fit(this.font, feature.description, row.width() - 12);
 				int descriptionX = row.x() + (row.width() - this.font.width(description)) / 2;
-				Ui.text(graphics, this.font, description, descriptionX, row.y() + 36, Ui.MUTED);
+				Ui.text(graphics, this.font, description, descriptionX, row.y() + 33, Ui.MUTED);
 			}
 			drawControl(graphics, row, mouseX, mouseY, dt);
 		}
