@@ -26,7 +26,7 @@ import java.util.Map;
 public final class VloxScreen extends Screen {
 	private static final int ROW_HEIGHT = 66;
 	private static final int ROW_GAP = 6;
-	private static final int GRID_COLUMNS = 3;
+	private static final int GRID_COLUMNS = 4;
 	private static final int RAIL_WIDTH = 124;
 	private static final int FOOTER_HEIGHT = 26;
 
