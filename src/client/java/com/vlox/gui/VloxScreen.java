@@ -284,7 +284,7 @@ public final class VloxScreen extends Screen {
 			float next = Ui.lerp(current, target, dt * 14.0F);
 			hoverAnim.put(feature.id, next);
 
-			int bg = next > 0.02F ? Ui.alpha(0xFFFFFF, (int) (14 * next)) : 0;
+			int bg = next > 0.02F ? 0x42FFFFFF : 0;
 			int alternate = (rows.indexOf(row) % 2 == 1) ? ROW_ALT : 0;
 
 			if (bg != 0 || alternate != 0) {
