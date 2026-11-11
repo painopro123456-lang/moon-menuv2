@@ -154,6 +154,7 @@ public final class VloxScreen extends Screen {
 
 	private Category category = Category.HUD;
 	private String query = "";
+	private boolean searchFocused;
 	private float scrollTarget;
 	private float scrollShown;
 	private long lastFrame = System.nanoTime();
@@ -197,9 +198,9 @@ public final class VloxScreen extends Screen {
 		this.searchY = this.panelY + 48;
 		this.searchWidth = Math.min(300, this.contentWidth - 32);
 
-		if (!VloxConfig.flag(Features.MENU_REMEMBER)) {
-			lastCategory = Category.HUD;
-		}
+		this.searchFocused = VloxConfig.flag(Features.MENU_SEARCH_FOCUS);
+		this.query = VloxConfig.flag(Features.MENU_REMEMBER)
+				? VloxConfig.getText("menu.lastSearch", "") : "";
 		if (this.category == null) {
 			this.category = lastCategory;
 		}
@@ -356,6 +357,9 @@ public final class VloxScreen extends Screen {
 		Ui.text(graphics, this.font, "All Modules", this.contentX + 16, this.panelY + 22, Ui.TEXT);
 
 		String count = this.visible.size() + " modules";
+		if (VloxConfig.flag(Features.MENU_SHOW_FPS)) {
+			count += "  •  " + Minecraft.getInstance().getFps() + " FPS";
+		}
 		Ui.text(graphics, this.font, count,
 				this.contentX + this.contentWidth - 16 - this.font.width(count),
 				this.panelY + 23, Ui.MUTED);
@@ -572,6 +576,12 @@ public final class VloxScreen extends Screen {
 		double mouseX = event.x();
 		double mouseY = event.y();
 
+		if (Ui.inside(mouseX, mouseY, this.searchX, this.searchY, this.searchWidth, this.searchHeight)) {
+			this.searchFocused = true;
+			return true;
+		}
+		this.searchFocused = false;
+
 		for (Row row : rows) {
 			if (!Ui.inside(mouseX, mouseY, row.x(), row.y(), row.width(), ROW_HEIGHT - 2)) {
 				continue;
@@ -738,9 +748,14 @@ public final class VloxScreen extends Screen {
 
 	@Override
 	public boolean keyPressed(KeyEvent event) {
-		if (event.key() == GLFW.GLFW_KEY_BACKSPACE && !this.query.isEmpty()) {
+		if (this.searchFocused && event.key() == GLFW.GLFW_KEY_BACKSPACE && !this.query.isEmpty()) {
 			this.query = this.query.substring(0, this.query.length() - 1);
+			rememberSearch();
 			refresh();
+			return true;
+		}
+		if (this.searchFocused && event.key() == GLFW.GLFW_KEY_ESCAPE) {
+			this.searchFocused = false;
 			return true;
 		}
 		return super.keyPressed(event);
@@ -748,12 +763,19 @@ public final class VloxScreen extends Screen {
 
 	@Override
 	public boolean charTyped(CharacterEvent event) {
-		if (event.isAllowedChatCharacter() && this.query.length() < 24) {
+		if (this.searchFocused && event.isAllowedChatCharacter() && this.query.length() < 48) {
 			this.query += event.codepointAsString();
+			rememberSearch();
 			refresh();
 			return true;
 		}
 		return super.charTyped(event);
+	}
+
+	private void rememberSearch() {
+		if (VloxConfig.flag(Features.MENU_REMEMBER)) {
+			VloxConfig.putText("menu.lastSearch", this.query);
+		}
 	}
 
 	@Override
