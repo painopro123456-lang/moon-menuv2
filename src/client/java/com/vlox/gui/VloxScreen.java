@@ -339,7 +339,7 @@ public final class VloxScreen extends Screen {
 
 		int width = 34;
 		int height = 16;
-		int track = on ? Ui.alpha(Ui.accent(), 90) : 0x30FFFFFF;
+		int track = on ? Ui.alpha(Ui.accent(), 90) : 0x42FFFFFF;
 
 		Ui.rounded(graphics, x, y, width, height, 8, track);
 		if (on) {
