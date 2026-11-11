@@ -136,7 +136,7 @@ public final class VloxScreen extends Screen {
 			Map.entry("menu.descriptions", "writable_book"),
 			Map.entry("menu.compact", "bundle"),
 			Map.entry("menu.showFps", "clock"),
-			Map.entry("menu.rememberCategory", "book"),
+			Map.entry("menu.rememberSearch", "book"),
 			Map.entry("menu.searchFocus", "spyglass"),
 			Map.entry("menu.accent", "cyan_dye"),
 			Map.entry("menu.presetPvp", "shield"),
