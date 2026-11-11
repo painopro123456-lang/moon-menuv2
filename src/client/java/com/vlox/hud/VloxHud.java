@@ -135,12 +135,16 @@ public final class VloxHud implements HudElement {
 			addLine();
 		}
 		if (VloxConfig.flag(Features.HUD_NETHER)) {
-			line("Portal coords  ");
-			boolean inNether = minecraft.level.dimension().identifier().getPath().equals("the_nether");
-			double factor = inNether ? 8.0D : 0.125D;
-			appendFixed(text, player.getX() * factor, 0);
-			text.append(" / ");
-			appendFixed(text, player.getZ() * factor, 0);
+			String dimension = minecraft.level.dimension().identifier().getPath();
+			if (dimension.equals("overworld") || dimension.equals("the_nether")) {
+				line("Portal coords  ");
+				double factor = dimension.equals("the_nether") ? 8.0D : 0.125D;
+				appendFixed(text, player.getX() * factor, 0);
+				text.append(" / ");
+				appendFixed(text, player.getZ() * factor, 0);
+			} else {
+				line("Portal coords  unavailable in this dimension");
+			}
 			addLine();
 		}
 		if (VloxConfig.flag(Features.HUD_FACING)) {
