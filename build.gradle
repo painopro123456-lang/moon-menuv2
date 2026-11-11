@@ -32,8 +32,10 @@ processResources {
 tasks.withType(JavaCompile).configureEach { it.options.release = 25 }
 
 // Give each release a versioned, user-friendly mod filename.
-tasks.named("remapJar") {
-	archiveFileName = "Moon Menu V${project.version}.jar"
+tasks.withType(AbstractArchiveTask).configureEach {
+	if (name == "remapJar") {
+		archiveFileName = "Moon Menu V${project.version}.jar"
+	}
 }
 
 java {
