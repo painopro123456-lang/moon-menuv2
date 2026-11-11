@@ -19,11 +19,14 @@ jobs:
           gradle-version: '9.8.0'
       - name: Build and test
         run: gradle build
+      - name: Show generated JARs
+        run: find build/libs -maxdepth 1 -type f -name '*.jar' -print
       - name: Upload mod JAR
         uses: actions/upload-artifact@v4
         with:
           name: moon-menu-v2-${{ github.run_number }}
-          path: build/libs/Moon Menu V*.jar
+          path: build/libs/*.jar
+          if-no-files-found: error
       - name: Publish direct JAR download
         uses: softprops/action-gh-release@v2
         with:
@@ -31,5 +34,5 @@ jobs:
           name: Moon Menu V2 latest
           body: Latest build of Moon Menu V2 for Minecraft 26.2 Fabric.
           prerelease: true
-          files: build/libs/Moon Menu V*.jar
+          files: build/libs/*.jar
           fail_on_unmatched_files: true
