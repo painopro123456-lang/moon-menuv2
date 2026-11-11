@@ -176,8 +176,8 @@ public final class Features {
 			"Fit more features on screen at once.", false);
 	public static final Feature MENU_SHOW_FPS = toggle(Category.MENU, "menu.showFps", "FPS in menu title",
 			"Show the current framerate in the menu header.", true);
-	public static final Feature MENU_REMEMBER = toggle(Category.MENU, "menu.rememberCategory", "Remember category",
-			"Reopen the menu on the category you used last.", true);
+	public static final Feature MENU_REMEMBER = toggle(Category.MENU, "menu.rememberSearch", "Remember search",
+			"Restore your last module search when the menu opens.", true);
 	public static final Feature MENU_SEARCH_FOCUS = toggle(Category.MENU, "menu.searchFocus", "Focus search",
 			"Put the cursor in the search box when the menu opens.", false);
 	public static final Feature MENU_ACCENT = choice(Category.MENU, "menu.accent", "Accent colour",
