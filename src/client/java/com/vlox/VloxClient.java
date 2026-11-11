@@ -44,13 +44,13 @@ public class VloxClient implements ClientModInitializer {
 				Identifier.fromNamespaceAndPath(MOD_ID, "main"));
 
 		menuKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
-				"key.vlox.menu",
+				"key.moonmenu.menu",
 				InputConstants.Type.KEYSYM,
 				GLFW.GLFW_KEY_RIGHT_SHIFT,
 				category));
 
 		zoomKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
-				"key.vlox.zoom",
+				"key.moonmenu.zoom",
 				InputConstants.Type.KEYSYM,
 				GLFW.GLFW_KEY_V,
 				category));
