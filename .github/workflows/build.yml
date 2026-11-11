@@ -22,8 +22,8 @@ jobs:
       - name: Upload mod JAR
         uses: actions/upload-artifact@v4
         with:
-          name: moon-menu-v2-2.0.0
-          path: build/libs/moon-menu-2.0.0.jar
+          name: moon-menu-v2-${{ github.run_number }}
+          path: build/libs/Moon Menu V*.jar
       - name: Publish direct JAR download
         env:
           GH_TOKEN: ${{ github.token }}
@@ -32,4 +32,6 @@ jobs:
           if ! gh release view "$TAG" >/dev/null 2>&1; then
             gh release create "$TAG" --title "Moon Menu V2 latest" --notes "Latest build of Moon Menu V2 for Minecraft 26.2 Fabric." --prerelease
           fi
-          gh release upload "$TAG" build/libs/moon-menu-2.0.0.jar --clobber
+          JAR=$(find build/libs -maxdepth 1 -type f -name 'Moon Menu V*.jar' -print -quit)
+          test -n "$JAR"
+          gh release upload "$TAG" "$JAR" --clobber
