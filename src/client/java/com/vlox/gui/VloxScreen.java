@@ -31,9 +31,9 @@ public final class VloxScreen extends Screen {
 	private static final int FOOTER_HEIGHT = 26;
 
 	private static final int PANEL_BG = 0x42FFFFFF;
-	private static final int RAIL_BG = 0x24FFFFFF;
-	private static final int ROW_HOVER = 0x0FFFFFFF;
-	private static final int ROW_ALT = 0x05FFFFFF;
+	private static final int RAIL_BG = 0x42FFFFFF;
+	private static final int ROW_HOVER = 0x42FFFFFF;
+	private static final int ROW_ALT = 0x42FFFFFF;
 
 	private static Category lastCategory = Category.HUD;
 
@@ -212,7 +212,7 @@ public final class VloxScreen extends Screen {
 		// Side rail
 		Ui.rounded(graphics, this.panelX, this.panelY, RAIL_WIDTH, this.panelHeight, 10, RAIL_BG);
 		graphics.fill(this.panelX + RAIL_WIDTH - 1, this.panelY + 12, this.panelX + RAIL_WIDTH,
-				this.panelY + this.panelHeight - 12, 0x14FFFFFF);
+				this.panelY + this.panelHeight - 12, 0x42FFFFFF);
 
 		drawRail(graphics, mouseX, mouseY);
 		drawHeader(graphics);
@@ -251,7 +251,7 @@ public final class VloxScreen extends Screen {
 				this.contentX + this.contentWidth - 16 - this.font.width(count),
 				this.panelY + 23, Ui.MUTED);
 
-		Ui.rounded(graphics, this.searchX, this.searchY, this.searchWidth, this.searchHeight, 9, 0x24FFFFFF);
+		Ui.rounded(graphics, this.searchX, this.searchY, this.searchWidth, this.searchHeight, 9, 0x42FFFFFF);
 		graphics.fill(this.searchX + 9, this.searchY + 4, this.searchX + 10, this.searchY + 14, Ui.FAINT);
 
 		String shown = this.query.isEmpty() ? "Search settings" : this.query;
@@ -264,7 +264,7 @@ public final class VloxScreen extends Screen {
 		}
 
 		graphics.fill(this.contentX + 16, this.listY - 6, this.contentX + this.contentWidth - 16,
-				this.listY - 5, 0x14FFFFFF);
+				this.listY - 5, 0x42FFFFFF);
 	}
 
 	private void drawRows(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float dt) {
@@ -366,10 +366,10 @@ public final class VloxScreen extends Screen {
 
 	private void drawChip(GuiGraphicsExtractor graphics, int x, int y, int width, int height, String text,
 			boolean hovered, boolean accent) {
-		int bg = hovered ? 0x38FFFFFF : 0x30FFFFFF;
+		int bg = 0x42FFFFFF;
 		Ui.rounded(graphics, x, y, width, height, 5, bg);
 		if (hovered) {
-			Ui.rounded(graphics, x, y, width, height, 5, 0x0DFFFFFF);
+			Ui.rounded(graphics, x, y, width, height, 5, 0x42FFFFFF);
 		}
 
 		String shown = Ui.fit(this.font, text, width - 12);
@@ -383,16 +383,16 @@ public final class VloxScreen extends Screen {
 		int width = row.controlWidth();
 		int height = row.controlHeight();
 
-		Ui.rounded(graphics, x, y, width, height, 5, 0x30FFFFFF);
+		Ui.rounded(graphics, x, y, width, height, 5, 0x42FFFFFF);
 
 		boolean hoverMinus = Ui.inside(mouseX, mouseY, x, y, 22, height);
 		boolean hoverPlus = Ui.inside(mouseX, mouseY, x + width - 22, y, 22, height);
 
 		if (hoverMinus) {
-			Ui.rounded(graphics, x, y, 22, height, 5, 0x14FFFFFF);
+			Ui.rounded(graphics, x, y, 22, height, 5, 0x42FFFFFF);
 		}
 		if (hoverPlus) {
-			Ui.rounded(graphics, x + width - 22, y, 22, height, 5, 0x14FFFFFF);
+			Ui.rounded(graphics, x + width - 22, y, 22, height, 5, 0x42FFFFFF);
 		}
 
 		Ui.text(graphics, this.font, "-", x + 9, y + 5, hoverMinus ? Ui.accent() : Ui.MUTED);
@@ -405,7 +405,7 @@ public final class VloxScreen extends Screen {
 	private void drawFooter(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
 		int y = this.panelY + this.panelHeight - FOOTER_HEIGHT;
 
-		graphics.fill(this.contentX + 16, y, this.contentX + this.contentWidth - 16, y + 1, 0x14FFFFFF);
+		graphics.fill(this.contentX + 16, y, this.contentX + this.contentWidth - 16, y + 1, 0x42FFFFFF);
 
 		Feature hoveredFeature = null;
 		for (Row row : rows) {
@@ -445,14 +445,14 @@ public final class VloxScreen extends Screen {
 			return;
 		}
 
-		Ui.rounded(graphics, trackX, trackTop, 3, trackHeight, 2, 0x1AFFFFFF);
+		Ui.rounded(graphics, trackX, trackTop, 3, trackHeight, 2, 0x42FFFFFF);
 
 		float ratio = (float) this.listHeight / total;
 		int thumbHeight = Math.max(20, Math.round(trackHeight * ratio));
 		float progress = this.scrollShown / Math.max(1, total - this.listHeight);
 		int thumbY = trackTop + Math.round((trackHeight - thumbHeight) * Math.max(0, Math.min(1, progress)));
 
-		Ui.rounded(graphics, trackX, thumbY, 3, thumbHeight, 2, 0x66FFFFFF);
+		Ui.rounded(graphics, trackX, thumbY, 3, thumbHeight, 2, 0x42FFFFFF);
 	}
 
 	private void positionSliders() {
