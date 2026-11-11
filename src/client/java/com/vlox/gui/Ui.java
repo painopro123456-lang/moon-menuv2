@@ -15,7 +15,7 @@ public final class Ui {
 
 	/** The selectable accent colours, in menu order. */
 	private static final int[] ACCENTS = {
-			0xFF35E08A, 0xFF3AC8FF, 0xFFFFB03A, 0xFFA97BFF, 0xFFFF6F9B
+			0xFFEAF2FA, 0xFF3AC8FF, 0xFFFFB03A, 0xFFA97BFF, 0xFFFF6F9B
 	};
 
 	private static int accent = ACCENTS[0];
