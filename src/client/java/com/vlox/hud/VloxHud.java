@@ -17,6 +17,7 @@ import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import org.joml.Matrix3x2fStack;
 
@@ -134,10 +135,12 @@ public final class VloxHud implements HudElement {
 			addLine();
 		}
 		if (VloxConfig.flag(Features.HUD_NETHER)) {
-			line("Nether  ");
-			appendFixed(text, player.getX() / 8.0, 0);
+			line("Portal coords  ");
+			boolean inNether = minecraft.level.dimension().identifier().getPath().equals("the_nether");
+			double factor = inNether ? 8.0D : 0.125D;
+			appendFixed(text, player.getX() * factor, 0);
 			text.append(" / ");
-			appendFixed(text, player.getZ() / 8.0, 0);
+			appendFixed(text, player.getZ() * factor, 0);
 			addLine();
 		}
 		if (VloxConfig.flag(Features.HUD_FACING)) {
@@ -262,7 +265,10 @@ public final class VloxHud implements HudElement {
 		if (VloxConfig.flag(Features.HUD_LOOKING)) {
 			HitResult hit = minecraft.hitResult;
 			if (hit instanceof BlockHitResult blockHit) {
-				line("Looking at  ").append(blockHit.getBlockPos().toShortString());
+				line("Looking at block  ").append(blockHit.getBlockPos().toShortString());
+				addLine();
+			} else if (hit instanceof EntityHitResult entityHit) {
+				line("Looking at  ").append(entityHit.getEntity().getName().getString());
 				addLine();
 			}
 		}
