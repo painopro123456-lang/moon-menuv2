@@ -27,7 +27,7 @@ public final class VloxScreen extends Screen {
 	private static final int ROW_HEIGHT = 66;
 	private static final int ROW_GAP = 6;
 	private static final int GRID_COLUMNS = 4;
-	private static final int RAIL_WIDTH = 124;
+	private static final int RAIL_WIDTH = 0;
 	private static final int FOOTER_HEIGHT = 26;
 
 	private static final int PANEL_BG = 0x42FFFFFF;
@@ -74,19 +74,19 @@ public final class VloxScreen extends Screen {
 
 	@Override
 	protected void init() {
-		this.panelWidth = Math.min(500, this.width - 32);
-		this.panelHeight = Math.min(320, this.height - 32);
+		this.panelWidth = Math.min(760, this.width - 32);
+		this.panelHeight = Math.min(440, this.height - 32);
 		this.panelX = (this.width - this.panelWidth) / 2;
 		this.panelY = (this.height - this.panelHeight) / 2;
 
-		this.contentX = this.panelX + RAIL_WIDTH;
+		this.contentX = this.panelX;
 		this.contentWidth = this.panelWidth - RAIL_WIDTH;
-		this.listY = this.panelY + 92;
+		this.listY = this.panelY + 82;
 		this.listHeight = this.panelHeight - 92 - FOOTER_HEIGHT;
 
 		this.searchX = this.contentX + 16;
-		this.searchY = this.panelY + 58;
-		this.searchWidth = Math.min(240, this.contentWidth - 32);
+		this.searchY = this.panelY + 48;
+		this.searchWidth = Math.min(300, this.contentWidth - 32);
 
 		if (!VloxConfig.flag(Features.MENU_REMEMBER)) {
 			lastCategory = Category.HUD;
@@ -103,9 +103,6 @@ public final class VloxScreen extends Screen {
 		String needle = query.trim().toLowerCase();
 
 		for (Feature feature : Features.ALL) {
-			if (feature.category != category) {
-				continue;
-			}
 			if (!needle.isEmpty()
 					&& !feature.label.toLowerCase().contains(needle)
 					&& !feature.id.toLowerCase().contains(needle)
@@ -230,35 +227,10 @@ public final class VloxScreen extends Screen {
 
 	private void drawRail(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
 		int x = this.panelX + 18;
-
-		Ui.textScaled(graphics, this.font, "MOON MENU", x, this.panelY + 26, Ui.accent(), 1.85F);
-		Ui.text(graphics, this.font, "SETTINGS", x + 1, this.panelY + 50, Ui.FAINT);
-
-		int itemY = this.panelY + 78;
-
-		for (Category cat : Category.values()) {
-			boolean active = cat == this.category;
-			boolean hovered = Ui.inside(mouseX, mouseY, x - 6, itemY, RAIL_WIDTH - 24, 26);
-
-			if (active) {
-				Ui.rounded(graphics, x - 6, itemY, RAIL_WIDTH - 24, 26, 6, Ui.alpha(Ui.accent(), 28));
-				graphics.fill(x - 6, itemY + 6, x - 4, itemY + 20, Ui.accent());
-			} else if (hovered) {
-				Ui.rounded(graphics, x - 6, itemY, RAIL_WIDTH - 24, 26, 6, 0x0DFFFFFF);
-			}
-
-			int label = active ? Ui.TEXT : hovered ? 0xFF263445 : Ui.MUTED;
-			Ui.text(graphics, this.font, cat.label, x + 6, itemY + 9, label);
-
-			int count = countIn(cat);
-			Ui.text(graphics, this.font, Integer.toString(count),
-					this.panelX + RAIL_WIDTH - 34 - this.font.width(Integer.toString(count)),
-					itemY + 9, active ? Ui.alpha(Ui.accent(), 200) : Ui.FAINT);
-
-			itemY += 30;
-		}
-
-		Ui.text(graphics, this.font, "v2.0.0", x, this.panelY + this.panelHeight - 22, Ui.FAINT);
+		Ui.textScaled(graphics, this.font, "MOON MENU", x, this.panelY + 16, Ui.accent(), 1.75F);
+		Ui.text(graphics, this.font, "MODS", x + 1, this.panelY + 34, Ui.FAINT);
+		Ui.text(graphics, this.font, "v2.0.0",
+				this.panelX + this.panelWidth - 52, this.panelY + 22, Ui.FAINT);
 	}
 
 	private int countIn(Category cat) {
@@ -272,9 +244,9 @@ public final class VloxScreen extends Screen {
 	}
 
 	private void drawHeader(GuiGraphicsExtractor graphics) {
-		Ui.text(graphics, this.font, this.category.label, this.contentX + 16, this.panelY + 22, Ui.TEXT);
+		Ui.text(graphics, this.font, "All Modules", this.contentX + 16, this.panelY + 22, Ui.TEXT);
 
-		String count = this.visible.size() + " of " + countIn(this.category);
+		String count = this.visible.size() + " modules";
 		Ui.text(graphics, this.font, count,
 				this.contentX + this.contentWidth - 16 - this.font.width(count),
 				this.panelY + 23, Ui.MUTED);
@@ -508,23 +480,6 @@ public final class VloxScreen extends Screen {
 	public boolean mouseClicked(MouseButtonEvent event, boolean doubled) {
 		double mouseX = event.x();
 		double mouseY = event.y();
-
-		// Category rail
-		int itemY = this.panelY + 78;
-		int railX = this.panelX + 12;
-		for (Category cat : Category.values()) {
-			if (Ui.inside(mouseX, mouseY, railX, itemY, RAIL_WIDTH - 24, 26)) {
-				this.category = cat;
-				if (VloxConfig.flag(Features.MENU_REMEMBER)) {
-					lastCategory = cat;
-				}
-				this.scrollTarget = 0;
-				this.scrollShown = 0;
-				refresh();
-				return true;
-			}
-			itemY += 30;
-		}
 
 		for (Row row : rows) {
 			if (!Ui.inside(mouseX, mouseY, row.x(), row.y(), row.width(), ROW_HEIGHT - 2)) {
