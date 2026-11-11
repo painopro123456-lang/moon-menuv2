@@ -82,25 +82,24 @@ public final class VloxHud implements HudElement {
 		int x = corner == 1 || corner == 3 ? screenWidth - boxWidth - 4 : 4;
 		int y = corner == 2 || corner == 3 ? screenHeight - boxHeight - 4 : 4;
 
-		if (VloxConfig.flag(Features.HUD_BACKGROUND)) {
-			int backdrop = Math.round(154 * (float) VloxConfig.get(Features.HUD_BACKDROP_OPACITY));
-			// Accent underneath, panel on top: the accent border follows the panel's own
-			// curve and runs the full height, with no dark caps at either end.
-			Ui.rounded(graphics, x, y, boxWidth, boxHeight, 6, Ui.alpha(Ui.accent(), 200));
-			Ui.rounded(graphics, x + 3, y, boxWidth - 3, boxHeight, 6, Ui.alpha(0x0A0F15, backdrop));
-		}
-
 		Matrix3x2fStack pose = graphics.pose();
 		pose.pushMatrix();
 		pose.translate((float) x, (float) y);
 		pose.scale(scale, scale);
 
 		boolean shadow = VloxConfig.flag(Features.HUD_SHADOW);
+		boolean backdropEnabled = VloxConfig.flag(Features.HUD_BACKGROUND);
+		int backdrop = Math.round(190 * (float) VloxConfig.get(Features.HUD_BACKDROP_OPACITY));
 		int cursorY = PAD;
-		for (int i = 0; i < rows.size(); i++) {
-			Row row = rows.get(i);
-			row.draw(graphics, font, PAD + 4, cursorY, shadow);
-			cursorY += row.height(font) + gap;
+		for (Row row : rows) {
+			int rowWidth = row.width(font) + 14;
+			int rowHeight = row.height(font) + 8;
+			if (backdropEnabled) {
+				Ui.rounded(graphics, PAD, cursorY, rowWidth, rowHeight, 5, Ui.alpha(0x0A0F15, backdrop));
+				graphics.fill(PAD, cursorY + 5, PAD + 2, cursorY + rowHeight - 5, Ui.accent());
+			}
+			row.draw(graphics, font, PAD + 8, cursorY + 4, shadow);
+			cursorY += rowHeight + gap;
 		}
 
 		pose.popMatrix();
@@ -328,8 +327,8 @@ public final class VloxHud implements HudElement {
 		int height = 0;
 		for (int i = 0; i < rows.size(); i++) {
 			Row row = rows.get(i);
-			textWidth = Math.max(textWidth, row.width(font));
-			height += row.height(font);
+			textWidth = Math.max(textWidth, row.width(font) + 14);
+			height += row.height(font) + 8;
 			if (i > 0) {
 				height += gap;
 			}
@@ -382,25 +381,15 @@ public final class VloxHud implements HudElement {
 		}
 	}
 
-	/** Draws the four equipped armour pieces as their real items. */
+	/** Four fixed equipment slots, each with its own durability readout. */
 	private void addArmour(LocalPlayer player, boolean durability) {
-		ItemStack[] worn = new ItemStack[4];
-		EquipmentSlot[] slots = { EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET };
-		int count = 0;
-		for (EquipmentSlot slot : slots) {
-			ItemStack stack = player.getItemBySlot(slot);
-			if (!stack.isEmpty()) {
-				worn[count++] = stack;
-			}
-		}
-		if (count == 0) {
-			line("Armour  none");
-			addLine();
-			return;
-		}
-		ItemStack[] trimmed = new ItemStack[count];
-		System.arraycopy(worn, 0, trimmed, 0, count);
-		rows.add(new ItemRow(trimmed, durability));
+		ItemStack[] worn = {
+				player.getItemBySlot(EquipmentSlot.HEAD),
+				player.getItemBySlot(EquipmentSlot.CHEST),
+				player.getItemBySlot(EquipmentSlot.LEGS),
+				player.getItemBySlot(EquipmentSlot.FEET)
+		};
+		rows.add(new ArmorRow(worn, durability));
 	}
 
 	private void addHeldItem(LocalPlayer player) {
@@ -592,7 +581,7 @@ public final class VloxHud implements HudElement {
 	}
 
 	/** One line of the HUD: plain text, a strip of items, or the keystroke block. */
-	private sealed interface Row permits TextRow, ItemRow, KeysRow {
+	private sealed interface Row permits TextRow, ItemRow, ArmorRow, KeysRow {
 		int width(Font font);
 
 		int height(Font font);
@@ -613,7 +602,15 @@ public final class VloxHud implements HudElement {
 
 		@Override
 		public void draw(GuiGraphicsExtractor graphics, Font font, int x, int y, boolean shadow) {
-			graphics.text(font, this.text, x, y, ON, shadow);
+						int split = this.text.indexOf("  ");
+			if (split > 0) {
+				String label = this.text.substring(0, split).trim();
+				String value = this.text.substring(split + 2).trim();
+				graphics.text(font, label, x, y, 0xFF9BAABD, shadow);
+				graphics.text(font, value, x + font.width(label) + 6, y, ON, shadow);
+			} else {
+				graphics.text(font, this.text, x, y, ON, shadow);
+			}
 		}
 	}
 
@@ -635,6 +632,53 @@ public final class VloxHud implements HudElement {
 				graphics.item(this.stacks[i], dx, y + 1);
 				if (this.durability) {
 					graphics.itemDecorations(font, this.stacks[i], dx, y + 1);
+				}
+			}
+		}
+	}
+
+	/** Lunar-style armour strip: four aligned slots with numeric durability. */
+	private record ArmorRow(ItemStack[] stacks, boolean durability) implements Row {
+		private static final int SLOT_WIDTH = 28;
+		private static final int SLOT_GAP = 3;
+
+		@Override
+		public int width(Font font) {
+			return SLOT_WIDTH * 4 + SLOT_GAP * 3;
+		}
+
+		@Override
+		public int height(Font font) {
+			return this.durability ? 34 : 20;
+		}
+
+		@Override
+		public void draw(GuiGraphicsExtractor graphics, Font font, int x, int y, boolean shadow) {
+			String[] slotLabels = { "H", "C", "L", "B" };
+			for (int i = 0; i < 4; i++) {
+				int dx = x + i * (SLOT_WIDTH + SLOT_GAP);
+				ItemStack stack = this.stacks[i];
+				Ui.rounded(graphics, dx, y, SLOT_WIDTH, this.durability ? 34 : 20, 4, 0x50131B26);
+				if (stack.isEmpty()) {
+					graphics.centeredText(font, slotLabels[i], dx + SLOT_WIDTH / 2, y + 4, 0xFF69788A);
+					if (this.durability) {
+						graphics.centeredText(font, "--", dx + SLOT_WIDTH / 2, y + 19, 0xFF69788A);
+					}
+					continue;
+				}
+				graphics.item(stack, dx + (SLOT_WIDTH - 16) / 2, y + 1);
+				if (!this.durability) {
+					continue;
+				}
+				int percent = stack.isDamageableItem()
+						? Math.round((stack.getMaxDamage() - stack.getDamageValue()) * 100.0F / stack.getMaxDamage())
+						: 100;
+				int color = percent > 60 ? 0xFF55E08A : percent > 25 ? 0xFFFFC857 : 0xFFFF626D;
+				graphics.centeredText(font, percent + "%", dx + SLOT_WIDTH / 2, y + 18, color);
+				graphics.fill(dx + 4, y + 29, dx + SLOT_WIDTH - 4, y + 31, 0x664B5664);
+				int barWidth = Math.round((SLOT_WIDTH - 8) * percent / 100.0F);
+				if (barWidth > 0) {
+					graphics.fill(dx + 4, y + 29, dx + 4 + barWidth, y + 31, color);
 				}
 			}
 		}
