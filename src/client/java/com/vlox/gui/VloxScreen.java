@@ -176,7 +176,7 @@ public final class VloxScreen extends Screen {
 	private int searchX;
 	private int searchY;
 	private int searchWidth;
-	private int searchHeight = 18;
+	private int searchHeight = 24;
 
 	private record Row(Feature feature, int y, int x, int width,
 			int controlX, int controlY, int controlWidth, int controlHeight) {
@@ -348,7 +348,7 @@ public final class VloxScreen extends Screen {
 
 	private void drawRail(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
 		int x = this.panelX + 20;
-		Ui.rounded(graphics, x, this.panelY + 17, 24, 24, 8, 0x72FFFFFF);
+		Ui.rounded(graphics, x, this.panelY + 17, 24, 24, 8, GLASS);
 		Ui.textScaled(graphics, this.font, "M", x + 7, this.panelY + 22, Ui.TEXT, 1.35F);
 		Ui.textScaled(graphics, this.font, "MOON MENU", x + 34, this.panelY + 18, Ui.TEXT, 1.55F);
 		Ui.text(graphics, this.font, "A cleaner way to control your client", x + 35, this.panelY + 40, Ui.MUTED);
@@ -468,7 +468,7 @@ public final class VloxScreen extends Screen {
 
 		int width = 34;
 		int height = 16;
-		int track = on ? 0x88FFFFFF : GLASS;
+		int track = GLASS;
 
 		Ui.rounded(graphics, x, y, width, height, 8, track);
 
