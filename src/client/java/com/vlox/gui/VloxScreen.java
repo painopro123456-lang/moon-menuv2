@@ -24,8 +24,9 @@ import java.util.Map;
 
 /** The VLOX menu, drawn by hand. */
 public final class VloxScreen extends Screen {
-	private static final int ROW_HEIGHT = 28;
-	private static final int ROW_GAP = 2;
+	private static final int ROW_HEIGHT = 66;
+	private static final int ROW_GAP = 6;
+	private static final int GRID_COLUMNS = 3;
 	private static final int RAIL_WIDTH = 124;
 	private static final int FOOTER_HEIGHT = 26;
 
@@ -114,7 +115,7 @@ public final class VloxScreen extends Screen {
 			visible.add(feature);
 		}
 
-		float maxScroll = Math.max(0, visible.size() * (ROW_HEIGHT + ROW_GAP) - listHeight + 8);
+		float maxScroll = Math.max(0, ((visible.size() + GRID_COLUMNS - 1) / GRID_COLUMNS) * (ROW_HEIGHT + ROW_GAP) - listHeight + 8);
 		scrollTarget = Math.max(0, Math.min(maxScroll, scrollTarget));
 
 		clearWidgets();
@@ -146,18 +147,22 @@ public final class VloxScreen extends Screen {
 
 	private void buildRows() {
 		rows.clear();
-		int rowWidth = this.contentWidth - 32;
+		int availableWidth = this.contentWidth - 32;
+		int cardWidth = (availableWidth - (GRID_COLUMNS - 1) * ROW_GAP) / GRID_COLUMNS;
 
 		for (int i = 0; i < visible.size(); i++) {
 			Feature feature = visible.get(i);
-			int y = Math.round(this.listY + 6 + i * (ROW_HEIGHT + ROW_GAP) - this.scrollShown);
+			int column = i % GRID_COLUMNS;
+			int gridRow = i / GRID_COLUMNS;
+			int x = this.contentX + 16 + column * (cardWidth + ROW_GAP);
+			int y = Math.round(this.listY + 6 + gridRow * (ROW_HEIGHT + ROW_GAP) - this.scrollShown);
 
-			int controlWidth = 104;
+			int controlWidth = Math.min(92, cardWidth - 12);
 			int controlHeight = 18;
 			OptionInstance<?> option = Features.optionFor(feature);
 
 			if (option != null) {
-				controlWidth = isBooleanOption(option) ? 34 : isEnumOption(option) ? 104 : 130;
+				controlWidth = isBooleanOption(option) ? 34 : isEnumOption(option) ? Math.min(92, cardWidth - 12) : Math.min(92, cardWidth - 12);
 				controlHeight = isBooleanOption(option) ? 16 : 18;
 			} else {
 				switch (feature.type) {
@@ -166,11 +171,11 @@ public final class VloxScreen extends Screen {
 						controlHeight = 16;
 					}
 					case NUMBER -> {
-						controlWidth = 104;
+						controlWidth = Math.min(92, cardWidth - 12);
 						controlHeight = 18;
 					}
 					case CHOICE -> {
-						controlWidth = 104;
+						controlWidth = Math.min(92, cardWidth - 12);
 						controlHeight = 18;
 					}
 					case ACTION -> {
@@ -180,9 +185,9 @@ public final class VloxScreen extends Screen {
 				}
 			}
 
-			int controlX = this.contentX + 16 + rowWidth - controlWidth - 12;
-			int controlY = y + (ROW_HEIGHT - controlHeight) / 2;
-			rows.add(new Row(feature, y, this.contentX + 16, rowWidth, controlX, controlY, controlWidth, controlHeight));
+			int controlX = x + (cardWidth - controlWidth) / 2;
+			int controlY = y + ROW_HEIGHT - controlHeight - 7;
+			rows.add(new Row(feature, y, x, cardWidth, controlX, controlY, controlWidth, controlHeight));
 		}
 	}
 
@@ -320,13 +325,13 @@ public final class VloxScreen extends Screen {
 			}
 
 			int labelY = row.y() + 7;
-			Ui.text(graphics, this.font, Ui.fit(this.font, feature.label, row.width() - row.controlWidth() - 40),
-					row.x() + 12, labelY, hovered ? Ui.TEXT : 0xFF263445);
+			Ui.text(graphics, this.font, Ui.fit(this.font, feature.label, row.width() - 12),
+					row.x() + 6, labelY, hovered ? Ui.TEXT : 0xFF263445);
 
 			if (VloxConfig.flag(Features.MENU_DESCRIPTIONS) && !VloxConfig.flag(Features.MENU_COMPACT)) {
 				Ui.text(graphics, this.font,
-						Ui.fit(this.font, feature.description, row.width() - row.controlWidth() - 40),
-						row.x() + 12, labelY + 10, hovered ? Ui.MUTED : Ui.FAINT);
+						Ui.fit(this.font, feature.description, row.width() - 12),
+						row.x() + 6, labelY + 12, hovered ? Ui.MUTED : Ui.FAINT);
 			}
 
 			drawControl(graphics, row, mouseX, mouseY, dt);
@@ -463,7 +468,7 @@ public final class VloxScreen extends Screen {
 		int trackX = this.contentX + this.contentWidth - 7;
 		int trackTop = this.listY + 4;
 		int trackHeight = this.listHeight - 8;
-		int total = this.visible.size() * (ROW_HEIGHT + ROW_GAP);
+		int total = ((this.visible.size() + GRID_COLUMNS - 1) / GRID_COLUMNS) * (ROW_HEIGHT + ROW_GAP);
 		if (total <= this.listHeight) {
 			return;
 		}
@@ -679,7 +684,7 @@ public final class VloxScreen extends Screen {
 			return super.mouseScrolled(mouseX, mouseY, horizontal, vertical);
 		}
 
-		float total = this.visible.size() * (ROW_HEIGHT + ROW_GAP);
+		float total = ((this.visible.size() + GRID_COLUMNS - 1) / GRID_COLUMNS) * (ROW_HEIGHT + ROW_GAP);
 		float max = Math.max(0, total - this.listHeight + 8);
 		this.scrollTarget = Math.max(0, Math.min(max, this.scrollTarget - (float) vertical * 34.0F));
 		return true;
