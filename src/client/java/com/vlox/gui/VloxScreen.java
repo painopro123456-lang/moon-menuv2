@@ -10,6 +10,9 @@ import net.minecraft.client.OptionInstance;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
@@ -34,6 +37,112 @@ public final class VloxScreen extends Screen {
 	private static final int RAIL_BG = 0x42FFFFFF;
 	private static final int ROW_HOVER = 0x42FFFFFF;
 	private static final int ROW_ALT = 0x42FFFFFF;
+
+	private static final String[] MODULE_ICONS = {
+			"beacon",
+			"tinted_glass",
+			"ink_sac",
+			"compass",
+			"spyglass",
+			"chain",
+			"clock",
+			"map",
+			"netherrack",
+			"recovery_compass",
+			"feather",
+			"grass_block",
+			"ender_eye",
+			"daylight_detector",
+			"cobblestone",
+			"torch",
+			"redstone",
+			"pig_spawn_egg",
+			"ender_pearl",
+			"golden_apple",
+			"cooked_beef",
+			"diamond_chestplate",
+			"oak_sign",
+			"target",
+			"totem_of_undying",
+			"item_frame",
+			"experience_bottle",
+			"leather_boots",
+			"turtle_helmet",
+			"ender_chest",
+			"stone",
+			"writable_book",
+			"nether_star",
+			"potion",
+			"slime_ball",
+			"iron_sword",
+			"white_stained_glass_pane",
+			"repeater",
+			"comparator",
+			"rabbit_foot",
+			"observer",
+			"redstone_lamp",
+			"white_wool",
+			"paper",
+			"water_bucket",
+			"oak_leaves",
+			"black_dye",
+			"glass",
+			"glowstone",
+			"amethyst_shard",
+			"piston",
+			"coal",
+			"book",
+			"prismarine_crystals",
+			"end_rod",
+			"lightning_rod",
+			"firework_rocket",
+			"tripwire_hook",
+			"minecart",
+			"arrow",
+			"spectral_arrow",
+			"flint",
+			"lever",
+			"rabbit_hide",
+			"golden_boots",
+			"shield",
+			"lectern",
+			"string",
+			"cyan_dye",
+			"chainmail_helmet",
+			"bundle",
+			"lodestone",
+			"amethyst_cluster",
+			"barrier",
+			"chest",
+			"anvil",
+			"crafting_table",
+			"furnace",
+			"blast_furnace",
+			"smoker",
+			"enchanting_table",
+			"brewing_stand",
+			"cauldron",
+			"hopper",
+			"dispenser",
+			"dropper",
+			"sculk_sensor",
+			"note_block",
+			"jukebox",
+			"bell",
+			"lantern",
+			"soul_lantern",
+			"campfire",
+			"soul_campfire",
+			"bucket",
+			"lava_bucket",
+			"snowball",
+			"egg",
+			"fishing_rod",
+			"bow",
+			"crossbow",
+			"trident",
+			"iron_helmet"
+	};
 
 	private static Category lastCategory = Category.HUD;
 
@@ -270,7 +379,6 @@ public final class VloxScreen extends Screen {
 	private void drawRows(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float dt) {
 		int top = this.listY;
 		int bottom = this.listY + this.listHeight;
-
 		for (Row row : rows) {
 			if (row.y() + ROW_HEIGHT < top - 2 || row.y() > bottom + 2) continue;
 			Feature feature = row.feature();
@@ -279,25 +387,22 @@ public final class VloxScreen extends Screen {
 			float current = hoverAnim.getOrDefault(feature.id, 0.0F);
 			float next = Ui.lerp(current, target, dt * 14.0F);
 			hoverAnim.put(feature.id, next);
-
-			// All white glass cards keep the same 0x42 alpha (26%).
 			Ui.rounded(graphics, row.x(), row.y(), row.width(), ROW_HEIGHT - 2, 9, 0x42FFFFFF);
 			if (next > 0.03F) {
-				graphics.fill(row.x(), row.y() + 9, row.x() + 2, row.y() + ROW_HEIGHT - 11,
-						Ui.alpha(Ui.accent(), (int) (220 * next)));
+				graphics.fill(row.x(), row.y() + 9, row.x() + 2, row.y() + ROW_HEIGHT - 11, Ui.alpha(Ui.accent(), (int) (220 * next)));
 			}
-
-			Ui.rounded(graphics, row.x() + 8, row.y() + 8, 19, 19, 6, Ui.alpha(Ui.accent(), 34));
-			String monogram = feature.label.isEmpty() ? "?" : feature.label.substring(0, 1).toUpperCase();
-			int monogramX = row.x() + 8 + (19 - this.font.width(monogram)) / 2;
-			Ui.text(graphics, this.font, monogram, monogramX, row.y() + 13, Ui.accent());
-
-			int labelX = row.x() + 33;
-			Ui.text(graphics, this.font, Ui.fit(this.font, feature.label, row.width() - 43),
-					labelX, row.y() + 11, Ui.TEXT);
+			int iconIndex = Features.ALL.indexOf(feature);
+			if (iconIndex >= 0 && iconIndex < MODULE_ICONS.length) {
+				ItemStack icon = new ItemStack(BuiltInRegistries.ITEM.getValue(Identifier.fromNamespaceAndPath("minecraft", MODULE_ICONS[iconIndex])));
+				graphics.item(icon, row.x() + (row.width() - 16) / 2, row.y() + 5);
+			}
+			String label = Ui.fit(this.font, feature.label, row.width() - 12);
+			int labelX = row.x() + (row.width() - this.font.width(label)) / 2;
+			Ui.text(graphics, this.font, label, labelX, row.y() + 25, Ui.TEXT);
 			if (VloxConfig.flag(Features.MENU_DESCRIPTIONS) && !VloxConfig.flag(Features.MENU_COMPACT)) {
-				Ui.text(graphics, this.font, Ui.fit(this.font, feature.description, row.width() - 16),
-						row.x() + 8, row.y() + 30, Ui.MUTED);
+				String description = Ui.fit(this.font, feature.description, row.width() - 12);
+				int descriptionX = row.x() + (row.width() - this.font.width(description)) / 2;
+				Ui.text(graphics, this.font, description, descriptionX, row.y() + 36, Ui.MUTED);
 			}
 			drawControl(graphics, row, mouseX, mouseY, dt);
 		}
