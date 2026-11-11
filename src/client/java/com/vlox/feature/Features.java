@@ -20,8 +20,8 @@ public final class Features {
 
 	public static final Feature HUD_ENABLED = toggle(Category.HUD, "hud.enabled", "HUD overlay",
 			"Master switch for every VLOX HUD line.", true);
-	public static final Feature HUD_BACKGROUND = toggle(Category.HUD, "hud.background", "Backdrop",
-			"Draw a dark panel behind the HUD text.", true);
+	public static final Feature HUD_BACKGROUND = toggle(Category.HUD, "hud.background", "Widget backgrounds",
+			"Show separate translucent cards behind each HUD module.", true);
 	public static final Feature HUD_SHADOW = toggle(Category.HUD, "hud.shadow", "Text shadow",
 			"Draw the drop shadow behind HUD text.", true);
 	public static final Feature HUD_CORNER = choice(Category.HUD, "hud.corner", "Corner",
