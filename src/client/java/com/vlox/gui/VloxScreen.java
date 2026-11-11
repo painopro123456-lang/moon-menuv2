@@ -400,14 +400,14 @@ public final class VloxScreen extends Screen {
 			boolean enabled = option != null && option.get() instanceof Boolean value
 					? value : option == null && feature.type == Feature.Type.TOGGLE && VloxConfig.flag(feature);
 
-			// One consistent glass surface; hover and enabled states use restrained outlines.
-			Ui.rounded(graphics, row.x(), row.y(), row.width(), cardHeight() - 2, 10, 0x42FFFFFF);
-			int outline = enabled ? Ui.alpha(Ui.accent(), 145) : Ui.alpha(0xFF718096, (int)(55 + next * 65));
-			graphics.fill(row.x() + 10, row.y(), row.x() + row.width() - 10, row.y() + 1, outline);
-			graphics.fill(row.x() + 10, row.y() + cardHeight() - 3, row.x() + row.width() - 10, row.y() + cardHeight() - 2, outline);
-			if (enabled || next > 0.05F) {
-				graphics.fill(row.x(), row.y() + 10, row.x() + 2, row.y() + cardHeight() - 12,
-						Ui.alpha(enabled ? Ui.accent() : 0xFF718096, enabled ? 210 : (int)(100 * next)));
+			// Frosted glass tile: keep enabled/hover states neutral, never tint the card green.
+			Ui.rounded(graphics, row.x(), row.y(), row.width(), cardHeight() - 2, 7, 0x42FFFFFF);
+			if (enabled) {
+				Ui.rounded(graphics, row.x() + 1, row.y() + 1, row.width() - 2, cardHeight() - 4, 6, 0x12FFFFFF);
+				graphics.fill(row.x() + 9, row.y() + 8, row.x() + 10, row.y() + cardHeight() - 10, 0xAFFFFFFF);
+			} else if (next > 0.05F) {
+				graphics.fill(row.x() + 9, row.y() + 8, row.x() + 10, row.y() + cardHeight() - 10,
+						Ui.alpha(0xFFFFFFFF, (int)(95 * next)));
 			}
 
 			String iconId = MODULE_ICONS.get(feature.id);
@@ -466,15 +466,13 @@ public final class VloxScreen extends Screen {
 
 		int width = 34;
 		int height = 16;
-		int track = on ? Ui.alpha(Ui.accent(), 90) : 0x42FFFFFF;
+		int track = on ? 0xA6FFFFFF : 0x42FFFFFF;
 
 		Ui.rounded(graphics, x, y, width, height, 8, track);
-		if (on) {
-			Ui.rounded(graphics, x, y, width, height, 8, Ui.alpha(Ui.accent(), 60));
-		}
+
 
 		int knobX = x + 3 + Math.round(current * (width - 6 - 10));
-		Ui.rounded(graphics, knobX, y + 3, 10, 10, 5, on ? Ui.accent() : 0xFF6C7A8C);
+		Ui.rounded(graphics, knobX, y + 3, 10, 10, 5, on ? 0xFFFFFFFF : 0xFF6C7A8C);
 	}
 
 	private void drawChip(GuiGraphicsExtractor graphics, int x, int y, int width, int height, String text,
