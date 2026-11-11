@@ -336,7 +336,7 @@ public final class VloxScreen extends Screen {
 		graphics.fillGradient(this.contentX, top - 2, this.contentX + this.contentWidth, top + 10,
 				0x22FFFFFF, 0x000D1219);
 		graphics.fillGradient(this.contentX, bottom - 10, this.contentX + this.contentWidth, bottom,
-				0x000D1219, 0xF00D1219);
+				0x000D1219, 0x22FFFFFF);
 	}
 
 	private void drawControl(GuiGraphicsExtractor graphics, Row row, int mouseX, int mouseY, float dt) {
