@@ -26,7 +26,7 @@ import java.util.Map;
 public final class VloxScreen extends Screen {
 	private static final int ROW_HEIGHT = 28;
 	private static final int ROW_GAP = 2;
-	private static final int RAIL_WIDTH = 132;
+	private static final int RAIL_WIDTH = 124;
 	private static final int FOOTER_HEIGHT = 26;
 
 	private static final int PANEL_BG = 0x42FFFFFF;
@@ -68,13 +68,13 @@ public final class VloxScreen extends Screen {
 	}
 
 	public VloxScreen() {
-		super(Component.literal("VLOX"));
+		super(Component.literal("Moon Menu"));
 	}
 
 	@Override
 	protected void init() {
-		this.panelWidth = Math.min(560, this.width - 32);
-		this.panelHeight = Math.min(360, this.height - 32);
+		this.panelWidth = Math.min(500, this.width - 32);
+		this.panelHeight = Math.min(320, this.height - 32);
 		this.panelX = (this.width - this.panelWidth) / 2;
 		this.panelY = (this.height - this.panelHeight) / 2;
 
@@ -226,7 +226,7 @@ public final class VloxScreen extends Screen {
 	private void drawRail(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
 		int x = this.panelX + 18;
 
-		Ui.textScaled(graphics, this.font, "VLOX", x, this.panelY + 26, Ui.accent(), 1.85F);
+		Ui.textScaled(graphics, this.font, "MOON MENU", x, this.panelY + 26, Ui.accent(), 1.85F);
 		Ui.text(graphics, this.font, "SETTINGS", x + 1, this.panelY + 50, Ui.FAINT);
 
 		int itemY = this.panelY + 78;
@@ -253,7 +253,7 @@ public final class VloxScreen extends Screen {
 			itemY += 30;
 		}
 
-		Ui.text(graphics, this.font, "v1.0.0", x, this.panelY + this.panelHeight - 22, Ui.FAINT);
+		Ui.text(graphics, this.font, "v2.0.0", x, this.panelY + this.panelHeight - 22, Ui.FAINT);
 	}
 
 	private int countIn(Category cat) {
@@ -334,7 +334,7 @@ public final class VloxScreen extends Screen {
 
 		// Fade the list edges so scrolled rows do not end abruptly.
 		graphics.fillGradient(this.contentX, top - 2, this.contentX + this.contentWidth, top + 10,
-				0xF00D1219, 0x000D1219);
+				0x22FFFFFF, 0x000D1219);
 		graphics.fillGradient(this.contentX, bottom - 10, this.contentX + this.contentWidth, bottom,
 				0x000D1219, 0xF00D1219);
 	}
@@ -406,7 +406,7 @@ public final class VloxScreen extends Screen {
 		int width = row.controlWidth();
 		int height = row.controlHeight();
 
-		Ui.rounded(graphics, x, y, width, height, 5, 0xFF151C26);
+		Ui.rounded(graphics, x, y, width, height, 5, 0x30FFFFFF);
 
 		boolean hoverMinus = Ui.inside(mouseX, mouseY, x, y, 22, height);
 		boolean hoverPlus = Ui.inside(mouseX, mouseY, x + width - 22, y, 22, height);
