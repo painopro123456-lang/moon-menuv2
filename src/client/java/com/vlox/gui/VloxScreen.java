@@ -27,11 +27,11 @@ import java.util.Map;
 
 /** The VLOX menu, drawn by hand. */
 public final class VloxScreen extends Screen {
-	private static final int ROW_HEIGHT = 66;
+	private static final int ROW_HEIGHT = 72;
 	private int cardHeight() {
 		return VloxConfig.flag(Features.MENU_COMPACT) ? 54 : ROW_HEIGHT;
 	}
-	private static final int ROW_GAP = 6;
+	private static final int ROW_GAP = 8;
 	private static final int GRID_COLUMNS = 4;
 	private static final int RAIL_WIDTH = 0;
 	private static final int FOOTER_HEIGHT = 26;
@@ -187,8 +187,8 @@ public final class VloxScreen extends Screen {
 
 	@Override
 	protected void init() {
-		this.panelWidth = Math.min(760, this.width - 32);
-		this.panelHeight = Math.min(440, this.height - 32);
+		this.panelWidth = Math.min(820, this.width - 40);
+		this.panelHeight = Math.min(500, this.height - 40);
 		this.panelX = (this.width - this.panelWidth) / 2;
 		this.panelY = (this.height - this.panelHeight) / 2;
 
@@ -295,8 +295,9 @@ public final class VloxScreen extends Screen {
 				}
 			}
 
-			int controlX = x + (cardWidth - controlWidth) / 2;
-			int controlY = y + cardHeight() - controlHeight - 7;
+			boolean toggleControl = (option != null && isBooleanOption(option)) || (option == null && feature.type == Feature.Type.TOGGLE);
+			int controlX = toggleControl ? x + cardWidth - controlWidth - 10 : x + (cardWidth - controlWidth) / 2;
+			int controlY = toggleControl ? y + 12 : y + cardHeight() - controlHeight - 8;
 			rows.add(new Row(feature, y, x, cardWidth, controlX, controlY, controlWidth, controlHeight));
 		}
 	}
@@ -394,23 +395,37 @@ public final class VloxScreen extends Screen {
 			float current = hoverAnim.getOrDefault(feature.id, 0.0F);
 			float next = Ui.lerp(current, target, dt * 14.0F);
 			hoverAnim.put(feature.id, next);
-			Ui.rounded(graphics, row.x(), row.y(), row.width(), cardHeight() - 2, 9, 0x42FFFFFF);
-			if (next > 0.03F) {
-				graphics.fill(row.x(), row.y() + 9, row.x() + 2, row.y() + cardHeight() - 11, Ui.alpha(Ui.accent(), (int) (220 * next)));
+
+			OptionInstance<?> option = Features.optionFor(feature);
+			boolean enabled = option != null && option.get() instanceof Boolean value
+					? value : option == null && feature.type == Feature.Type.TOGGLE && VloxConfig.flag(feature);
+
+			// One consistent glass surface; hover and enabled states use restrained outlines.
+			Ui.rounded(graphics, row.x(), row.y(), row.width(), cardHeight() - 2, 10, 0x42FFFFFF);
+			int outline = enabled ? Ui.alpha(Ui.accent(), 145) : Ui.alpha(0xFF718096, (int)(55 + next * 65));
+			graphics.fill(row.x() + 10, row.y(), row.x() + row.width() - 10, row.y() + 1, outline);
+			graphics.fill(row.x() + 10, row.y() + cardHeight() - 3, row.x() + row.width() - 10, row.y() + cardHeight() - 2, outline);
+			if (enabled || next > 0.05F) {
+				graphics.fill(row.x(), row.y() + 10, row.x() + 2, row.y() + cardHeight() - 12,
+						Ui.alpha(enabled ? Ui.accent() : 0xFF718096, enabled ? 210 : (int)(100 * next)));
 			}
+
 			String iconId = MODULE_ICONS.get(feature.id);
 			if (iconId != null) {
 				ItemStack icon = new ItemStack(BuiltInRegistries.ITEM.getValue(Identifier.fromNamespaceAndPath("minecraft", iconId)));
-				graphics.item(icon, row.x() + (row.width() - 16) / 2, row.y() + 5);
+				graphics.item(icon, row.x() + 12, row.y() + 13);
 			}
-			String label = Ui.fit(this.font, feature.label, row.width() - 12);
-			int labelX = row.x() + (row.width() - this.font.width(label)) / 2;
-			Ui.text(graphics, this.font, label, labelX, row.y() + 22, Ui.TEXT);
+
+			int labelX = row.x() + 38;
+			int labelMax = row.width() - (enabled || (option != null && isBooleanOption(option)) || feature.type == Feature.Type.TOGGLE ? 86 : 50);
+			String label = Ui.fit(this.font, feature.label, labelMax);
+			Ui.text(graphics, this.font, label, labelX, row.y() + 16, Ui.TEXT);
+
 			if (VloxConfig.flag(Features.MENU_DESCRIPTIONS) && !VloxConfig.flag(Features.MENU_COMPACT)) {
-				String description = Ui.fit(this.font, feature.description, row.width() - 12);
-				int descriptionX = row.x() + (row.width() - this.font.width(description)) / 2;
-				Ui.text(graphics, this.font, description, descriptionX, row.y() + 33, Ui.MUTED);
+				String description = Ui.fit(this.font, feature.description, row.width() - 24);
+				Ui.text(graphics, this.font, description, row.x() + 12, row.y() + 39, Ui.MUTED);
 			}
+
 			drawControl(graphics, row, mouseX, mouseY, dt);
 		}
 	}
