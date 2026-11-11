@@ -25,13 +25,11 @@ jobs:
           name: moon-menu-v2-${{ github.run_number }}
           path: build/libs/Moon Menu V*.jar
       - name: Publish direct JAR download
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          TAG="moon-menu-v2-latest"
-          if ! gh release view "$TAG" >/dev/null 2>&1; then
-            gh release create "$TAG" --title "Moon Menu V2 latest" --notes "Latest build of Moon Menu V2 for Minecraft 26.2 Fabric." --prerelease
-          fi
-          JAR=$(find build/libs -maxdepth 1 -type f -name 'Moon Menu V*.jar' -print -quit)
-          test -n "$JAR"
-          gh release upload "$TAG" "$JAR" --clobber
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: moon-menu-v2-latest
+          name: Moon Menu V2 latest
+          body: Latest build of Moon Menu V2 for Minecraft 26.2 Fabric.
+          prerelease: true
+          files: build/libs/Moon Menu V*.jar
+          fail_on_unmatched_files: true
