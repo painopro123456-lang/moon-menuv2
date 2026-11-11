@@ -14,6 +14,6 @@ A client-side Fabric mod for Minecraft 26.2. Open the compact menu with **Right 
 
 ## Build
 
-Requires JDK 25 and Gradle 9.1.0. Run `gradle build`. GitHub Actions builds and tests the project on pushes to `main`, then uploads the JAR as a workflow artifact.
+Requires JDK 25 and Gradle 9.8.0. Run `gradle build`. GitHub Actions builds and tests the project on pushes to `main`, then uploads the JAR as a workflow artifact.
 
 Install the JAR in the Fabric `mods` folder alongside Fabric API for Minecraft 26.2.
