@@ -207,7 +207,7 @@ public final class VloxScreen extends Screen {
 
 		// No fullscreen dimmer: Minecraft remains visible around and through the menu.
 
-		Ui.panel(graphics, this.panelX, this.panelY, this.panelWidth, this.panelHeight, 10, PANEL_BG);
+		Ui.panel(graphics, this.panelX, this.panelY, this.panelWidth, this.panelHeight, 14, PANEL_BG);
 
 		// Side rail
 		Ui.rounded(graphics, this.panelX, this.panelY, RAIL_WIDTH, this.panelHeight, 10, RAIL_BG);
@@ -272,50 +272,36 @@ public final class VloxScreen extends Screen {
 		int bottom = this.listY + this.listHeight;
 
 		for (Row row : rows) {
-			if (row.y() + ROW_HEIGHT < top - 2 || row.y() > bottom + 2) {
-				continue;
-			}
-
+			if (row.y() + ROW_HEIGHT < top - 2 || row.y() > bottom + 2) continue;
 			Feature feature = row.feature();
 			boolean hovered = Ui.inside(mouseX, mouseY, row.x(), row.y(), row.width(), ROW_HEIGHT);
-
 			float target = hovered ? 1.0F : 0.0F;
 			float current = hoverAnim.getOrDefault(feature.id, 0.0F);
 			float next = Ui.lerp(current, target, dt * 14.0F);
 			hoverAnim.put(feature.id, next);
 
-			int bg = next > 0.02F ? 0x42FFFFFF : 0;
-			int alternate = (rows.indexOf(row) % 2 == 1) ? ROW_ALT : 0;
-
-			if (bg != 0 || alternate != 0) {
-				Ui.rounded(graphics, row.x(), row.y(), row.width(), ROW_HEIGHT - 2, 6, bg != 0 ? bg : alternate);
+			// All white glass cards keep the same 0x42 alpha (26%).
+			Ui.rounded(graphics, row.x(), row.y(), row.width(), ROW_HEIGHT - 2, 9, 0x42FFFFFF);
+			if (next > 0.03F) {
+				graphics.fill(row.x(), row.y() + 9, row.x() + 2, row.y() + ROW_HEIGHT - 11,
+						Ui.alpha(Ui.accent(), (int) (220 * next)));
 			}
 
-			if (next > 0.05F) {
-				graphics.fill(row.x(), row.y() + 7, row.x() + 2, row.y() + ROW_HEIGHT - 9,
-						Ui.alpha(Ui.accent(), (int) (230 * next)));
-			}
+			Ui.rounded(graphics, row.x() + 8, row.y() + 8, 19, 19, 6, Ui.alpha(Ui.accent(), 34));
+			String monogram = feature.label.isEmpty() ? "?" : feature.label.substring(0, 1).toUpperCase();
+			int monogramX = row.x() + 8 + (19 - this.font.width(monogram)) / 2;
+			Ui.text(graphics, this.font, monogram, monogramX, row.y() + 13, Ui.accent());
 
-			int labelY = row.y() + 7;
-			Ui.text(graphics, this.font, Ui.fit(this.font, feature.label, row.width() - 12),
-					row.x() + 6, labelY, hovered ? Ui.TEXT : 0xFF263445);
-
+			int labelX = row.x() + 33;
+			Ui.text(graphics, this.font, Ui.fit(this.font, feature.label, row.width() - 43),
+					labelX, row.y() + 11, Ui.TEXT);
 			if (VloxConfig.flag(Features.MENU_DESCRIPTIONS) && !VloxConfig.flag(Features.MENU_COMPACT)) {
-				Ui.text(graphics, this.font,
-						Ui.fit(this.font, feature.description, row.width() - 12),
-						row.x() + 6, labelY + 12, hovered ? Ui.MUTED : Ui.FAINT);
+				Ui.text(graphics, this.font, Ui.fit(this.font, feature.description, row.width() - 16),
+						row.x() + 8, row.y() + 30, Ui.MUTED);
 			}
-
 			drawControl(graphics, row, mouseX, mouseY, dt);
 		}
-
-		// Fade the list edges so scrolled rows do not end abruptly.
-		graphics.fillGradient(this.contentX, top - 2, this.contentX + this.contentWidth, top + 10,
-				0x22FFFFFF, 0x000D1219);
-		graphics.fillGradient(this.contentX, bottom - 10, this.contentX + this.contentWidth, bottom,
-				0x000D1219, 0x22FFFFFF);
 	}
-
 	private void drawControl(GuiGraphicsExtractor graphics, Row row, int mouseX, int mouseY, float dt) {
 		Feature feature = row.feature();
 		OptionInstance<?> option = Features.optionFor(feature);
@@ -367,9 +353,9 @@ public final class VloxScreen extends Screen {
 	private void drawChip(GuiGraphicsExtractor graphics, int x, int y, int width, int height, String text,
 			boolean hovered, boolean accent) {
 		int bg = 0x42FFFFFF;
-		Ui.rounded(graphics, x, y, width, height, 5, bg);
+		Ui.rounded(graphics, x, y, width, height, 7, bg);
 		if (hovered) {
-			Ui.rounded(graphics, x, y, width, height, 5, 0x42FFFFFF);
+			Ui.rounded(graphics, x, y, width, height, 7, 0x42FFFFFF);
 		}
 
 		String shown = Ui.fit(this.font, text, width - 12);
