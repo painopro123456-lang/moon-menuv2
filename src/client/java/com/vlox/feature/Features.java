@@ -33,7 +33,7 @@ public final class Features {
 
 	public static final Feature HUD_FPS = toggle(Category.HUD, "hud.fps", "FPS", "Frames per second.", true);
 	public static final Feature HUD_COORDS = toggle(Category.HUD, "hud.coords", "Coordinates", "Your X, Y and Z position.", true);
-	public static final Feature HUD_NETHER = toggle(Category.HUD, "hud.nether", "Nether coords", "Overworld position converted to Nether scale.", false);
+	public static final Feature HUD_NETHER = toggle(Category.HUD, "hud.nether", "Nether coords", "Portal coordinate conversion between the Overworld and Nether.", false);
 	public static final Feature HUD_FACING = toggle(Category.HUD, "hud.facing", "Facing", "Compass direction and yaw.", false);
 	public static final Feature HUD_SPEED = toggle(Category.HUD, "hud.speed", "Speed", "Movement speed in blocks per second.", false);
 	public static final Feature HUD_BIOME = toggle(Category.HUD, "hud.biome", "Biome", "The biome you are standing in.", false);
@@ -41,9 +41,9 @@ public final class Features {
 	public static final Feature HUD_TIME = toggle(Category.HUD, "hud.time", "World time", "In-game time of day.", false);
 	public static final Feature HUD_DAY = toggle(Category.HUD, "hud.day", "Day count", "Days since the world started.", false);
 	public static final Feature HUD_CHUNK = toggle(Category.HUD, "hud.chunk", "Chunk position", "Which chunk you are in.", false);
-	public static final Feature HUD_LIGHT = toggle(Category.HUD, "hud.light", "Light level", "Block and sky light where you stand.", false);
+	public static final Feature HUD_LIGHT = toggle(Category.HUD, "hud.light", "Light level", "Maximum local light level at your position.", false);
 	public static final Feature HUD_MEMORY = toggle(Category.HUD, "hud.memory", "Memory", "Used and maximum JVM memory.", false);
-	public static final Feature HUD_ENTITIES = toggle(Category.HUD, "hud.entities", "Entities", "Entities currently being rendered.", false);
+	public static final Feature HUD_ENTITIES = toggle(Category.HUD, "hud.entities", "Entities", "Loaded entities in the current level.", false);
 	public static final Feature HUD_PING = toggle(Category.HUD, "hud.ping", "Ping", "Latency to the current server.", false);
 	public static final Feature HUD_HEALTH = toggle(Category.HUD, "hud.health", "Health", "Health and absorption as numbers.", false);
 	public static final Feature HUD_HUNGER = toggle(Category.HUD, "hud.hunger", "Hunger", "Food level and saturation.", false);
@@ -173,7 +173,7 @@ public final class Features {
 	public static final Feature MENU_DESCRIPTIONS = toggle(Category.MENU, "menu.descriptions", "Show descriptions",
 			"Display a one line description under each feature name.", true);
 	public static final Feature MENU_COMPACT = toggle(Category.MENU, "menu.compact", "Compact rows",
-			"Fit more features on screen at once.", false);
+			"Use shorter cards to fit more features on screen.", false);
 	public static final Feature MENU_SHOW_FPS = toggle(Category.MENU, "menu.showFps", "FPS in menu title",
 			"Show the current framerate in the menu header.", true);
 	public static final Feature MENU_REMEMBER = toggle(Category.MENU, "menu.rememberSearch", "Remember search",
