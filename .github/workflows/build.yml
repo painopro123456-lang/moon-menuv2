@@ -4,7 +4,7 @@ on:
     branches: [ main ]
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -24,3 +24,12 @@ jobs:
         with:
           name: moon-menu-v2-2.0.0
           path: build/libs/moon-menu-2.0.0.jar
+      - name: Publish direct JAR download
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="moon-menu-v2-latest"
+          if ! gh release view "$TAG" >/dev/null 2>&1; then
+            gh release create "$TAG" --title "Moon Menu V2 latest" --notes "Latest build of Moon Menu V2 for Minecraft 26.2 Fabric." --prerelease
+          fi
+          gh release upload "$TAG" build/libs/moon-menu-2.0.0.jar --clobber
