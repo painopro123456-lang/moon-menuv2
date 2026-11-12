@@ -191,6 +191,92 @@ public final class ModuleRuntime {
                 }
             }
         }
+        if (isEnabled("Clock") || isEnabled("Clock 24h")) {
+            java.time.LocalTime now = java.time.LocalTime.now();
+            String clock = isEnabled("Clock 24h")
+                    ? now.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm"))
+                    : now.format(java.time.format.DateTimeFormatter.ofPattern("h:mm a"));
+            y = line(graphics, client, "CLOCK  " + clock, y);
+        }
+        if (isEnabled("Speed")) {
+            var motion = client.player.getDeltaMovement();
+            double speed = Math.sqrt(motion.x * motion.x + motion.z * motion.z) * 20.0;
+            y = line(graphics, client, String.format("SPEED  %.2f m/s", speed), y);
+        }
+        if (isEnabled("Weather") || isEnabled("Weather Visuals")) {
+            String weather = client.level.isThundering() ? "Thunder"
+                    : client.level.isRaining() ? "Rain" : "Clear";
+            y = line(graphics, client, "WEATHER  " + weather, y);
+        }
+        if (isEnabled("Experience")) {
+            y = line(graphics, client, "XP  " + client.player.experienceLevel
+                    + "  " + Math.round(client.player.experienceProgress * 100) + "%", y);
+        }
+        if (isEnabled("Reach Display") && client.hitResult instanceof net.minecraft.world.phys.EntityHitResult reachHit) {
+            y = line(graphics, client, String.format("REACH  %.2f blocks",
+                    client.player.distanceTo(reachHit.getEntity())), y);
+        }
+        if (isEnabled("Target Info") && client.hitResult instanceof net.minecraft.world.phys.EntityHitResult infoHit) {
+            var target = infoHit.getEntity();
+            String info = target.getName().getString();
+            if (target instanceof net.minecraft.world.entity.LivingEntity living) {
+                info += String.format("  %.1f HP", living.getHealth());
+            }
+            y = line(graphics, client, "TARGET INFO  " + info, y);
+        }
+        if (isEnabled("Keystrokes")) {
+            String keys = (client.options.keyUp.isDown() ? "W" : "w") + " "
+                    + (client.options.keyLeft.isDown() ? "A" : "a") + " "
+                    + (client.options.keyDown.isDown() ? "S" : "s") + " "
+                    + (client.options.keyRight.isDown() ? "D" : "d")
+                    + (client.options.keyJump.isDown() ? "  SPACE" : "");
+            y = line(graphics, client, "KEYS  " + keys, y);
+        }
+        if (isEnabled("Totem Count") || isEnabled("Arrow Count") || isEnabled("Projectile Count")) {
+            int totems = 0, arrows = 0, projectiles = 0;
+            for (int slot = 0; slot < client.player.getInventory().getContainerSize(); slot++) {
+                var stack = client.player.getInventory().getItem(slot);
+                if (stack.is(net.minecraft.world.item.Items.TOTEM_OF_UNDYING)) totems += stack.getCount();
+                if (stack.is(net.minecraft.world.item.Items.ARROW)
+                        || stack.is(net.minecraft.world.item.Items.SPECTRAL_ARROW)
+                        || stack.is(net.minecraft.world.item.Items.TIPPED_ARROW)) arrows += stack.getCount();
+                if (stack.getItem() instanceof net.minecraft.world.item.ProjectileWeaponItem) {
+                    projectiles += stack.getCount();
+                }
+            }
+            if (isEnabled("Totem Count")) y = line(graphics, client, "TOTEMS  " + totems, y);
+            if (isEnabled("Arrow Count")) y = line(graphics, client, "ARROWS  " + arrows, y);
+            if (isEnabled("Projectile Count")) y = line(graphics, client, "PROJECTILES  " + projectiles, y);
+        }
+        if (isEnabled("Armor Durability") || isEnabled("Armor Status")) {
+            var inventory = client.player.getInventory();
+            String[] labels = {"BOOTS", "LEGS", "CHEST", "HELM"};
+            net.minecraft.world.entity.EquipmentSlot[] slots = {
+                    net.minecraft.world.entity.EquipmentSlot.FEET,
+                    net.minecraft.world.entity.EquipmentSlot.LEGS,
+                    net.minecraft.world.entity.EquipmentSlot.CHEST,
+                    net.minecraft.world.entity.EquipmentSlot.HEAD
+            };
+            for (int i = 0; i < slots.length; i++) {
+                var stack = client.player.getItemBySlot(slots[i]);
+                if (!stack.isEmpty() && stack.isDamageableItem()) {
+                    int remaining = stack.getMaxDamage() - stack.getDamageValue();
+                    int percent = Math.round(remaining * 100.0f / stack.getMaxDamage());
+                    y = line(graphics, client, labels[i] + "  " + percent + "%", y);
+                }
+            }
+        }
+        if (isEnabled("Durability Percent")) {
+            var stack = client.player.getMainHandItem();
+            if (!stack.isEmpty() && stack.isDamageableItem()) {
+                int percent = Math.round((stack.getMaxDamage() - stack.getDamageValue())
+                        * 100.0f / stack.getMaxDamage());
+                y = line(graphics, client, "DURABILITY  " + percent + "%", y);
+            }
+        }
+        if (isEnabled("Server Address") && client.getCurrentServer() != null) {
+            y = line(graphics, client, "SERVER  " + client.getCurrentServer().ip, y);
+        }
         if (isEnabled("World Time")) {
             long dayTime = client.level.getGameTime() % 24000L;
             long hours = (dayTime / 1000L + 6L) % 24L;
