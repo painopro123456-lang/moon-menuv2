@@ -13,8 +13,8 @@ public final class MoonMenuScreen extends Screen {
     private ModuleSpec selected;
     private int panelX, panelY, panelW, panelH;
     private int contentX, contentY, contentW;
-    private int rowW, rowH = 22;
-    private static final int PAGE_SIZE = 9;
+    private int rowW, rowH = 32;
+    private static final int PAGE_SIZE = 10;
     private int page = 0;
 
     public MoonMenuScreen() {
@@ -27,13 +27,13 @@ public final class MoonMenuScreen extends Screen {
     }
 
     private void layout() {
-        panelW = Math.min(790, width - 28);
-        panelH = Math.min(440, height - 28);
+        panelW = Math.min(900, width - 28);
+        panelH = Math.min(500, height - 28);
         panelX = (width - panelW) / 2;
         panelY = (height - panelH) / 2;
-        contentX = panelX + 258;
-        contentY = panelY + 146;
-        contentW = panelW - 282;
+        contentX = panelX + 176;
+        contentY = panelY + 112;
+        contentW = panelW - 198;
         rowW = contentW;
     }
 
@@ -41,8 +41,8 @@ public final class MoonMenuScreen extends Screen {
     public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float delta) {
         layout();
         drawAtmosphere(g);
-        drawMoonColumn(g);
-        drawColorWheel(g);
+        drawSidebar(g);
+        drawColorPicker(g);
         drawControls(g, mouseX, mouseY);
         if (selected != null) drawSettings(g, mouseX, mouseY);
         super.extractRenderState(g, mouseX, mouseY, delta);
@@ -61,60 +61,49 @@ public final class MoonMenuScreen extends Screen {
         }
     }
 
-    private void drawMoonColumn(GuiGraphicsExtractor g) {
-        int left = panelX + 26;
-        g.text(font, "MOON MENU", left, panelY + 24, 0xFFF0F4FC, false);
-        g.text(font, "CLIENT MOD  /  26.2", left, panelY + 42, 0xFF8F9DB4, false);
+    private void drawSidebar(GuiGraphicsExtractor g) {
+        int left = panelX + 22;
+        int sidebarRight = panelX + 156;
+        g.text(font, "MOON MENU", left, panelY + 22, 0xFFF0F4FC, false);
+        g.text(font, "PVP CLIENT", left, panelY + 39, 0xFF8F9DB4, false);
+        g.fill(left, panelY + 58, sidebarRight, panelY + 59, 0x397F91AA);
 
-        int cx = panelX + 116, cy = panelY + 164;
-        // Layered atmospheric halo: soft, wide rings behind the moon.
-        GlassSurface.rounded(g, cx - 66, cy - 66, 132, 132, 66, 0x102E4664);
-        GlassSurface.rounded(g, cx - 58, cy - 58, 116, 116, 58, 0x183D5878);
-        GlassSurface.rounded(g, cx - 51, cy - 51, 102, 102, 51, 0x286C829F);
-        // A fine outer rim and cool pearl surface.
-        GlassSurface.rounded(g, cx - 44, cy - 44, 88, 88, 44, 0x6CDAE7F8);
-        GlassSurface.rounded(g, cx - 40, cy - 40, 80, 80, 40, 0xFFE9F0FA);
-        // Offset shadow carves a clean crescent, leaving the illuminated
-        // silver edge on the left rather than a flat circle.
-        GlassSurface.rounded(g, cx - 4, cy - 51, 82, 82, 41, 0xF0141B2B);
-        // Delicate surface marks on the lit arc.
-        GlassSurface.rounded(g, cx - 29, cy - 16, 8, 8, 4, 0x2D8195AE);
-        GlassSurface.rounded(g, cx - 19, cy + 10, 5, 5, 3, 0x26788DA8);
-        GlassSurface.rounded(g, cx - 34, cy + 25, 3, 3, 2, 0x33788DA8);
-        // Tiny distant stars complete the moonlit focal point.
-        GlassSurface.rounded(g, cx + 53, cy - 37, 3, 3, 2, 0xD7E6F2FF);
-        GlassSurface.rounded(g, cx + 61, cy + 16, 2, 2, 1, 0xAFC4D5EC);
-        GlassSurface.rounded(g, cx - 61, cy - 49, 2, 2, 1, 0xAFC4D5EC);
-        GlassSurface.rounded(g, cx - 58, cy + 43, 3, 3, 2, 0xAFC4D5EC);
+        int y = panelY + 76;
+        for (String item : GROUPS) {
+            boolean active = group.equals(item);
+            int h = 30;
+            if (active) {
+                GlassSurface.rounded(g, left - 5, y - 5, 137, h, 7,
+                        MenuTheme.accentWithAlpha(0x50));
+                GlassSurface.rounded(g, left - 5, y + 1, 2, h - 12, 1,
+                        MenuTheme.accentWithAlpha(0xE0));
+            }
+            g.text(font, item, left + 7, y + 5,
+                    active ? 0xFFF1F5FC : 0xFF9AA9BF, false);
+            y += 36;
+        }
 
-        g.text(font, group.toUpperCase(), left, panelY + 244, 0xFFE6EDF8, false);
-        g.text(font, countForGroup() + " MODULES", left, panelY + 263, 0xFF9AA9BF, false);
-        g.fill(left, panelY + 288, panelX + 220, panelY + 289, 0x397F91AA);
-        g.text(font, "RIGHT SHIFT", left, panelY + 306, 0xFFD0D9E8, false);
-        g.text(font, "TO CLOSE", left, panelY + 322, 0xFF8998AF, false);
-        g.text(font, "A LITTLE MORE", left, panelY + panelH - 43, 0xFF8797B0, false);
-        g.text(font, "NIGHT IN YOUR HUD", left, panelY + panelH - 27, 0xFF8797B0, false);
+        g.text(font, countForGroup() + " MODULES", left, panelY + 236,
+                0xFF9AA9BF, false);
+        g.fill(left, panelY + 256, sidebarRight, panelY + 257, 0x397F91AA);
+        g.text(font, "MENU COLOR", left, panelY + panelH - 67, 0xFFDCE5F2, false);
+        g.text(font, "CHANGE ACCENT", left, panelY + panelH - 51, 0xFF8797B0, false);
     }
 
-
-    private void drawColorWheel(GuiGraphicsExtractor g) {
-        int x = panelX + 54;
-        int y = panelY + panelH - 104;
-        int radius = 25;
-        for (int py = -radius; py <= radius; py++) {
-            for (int px = -radius; px <= radius; px++) {
-                float distance = (float) Math.sqrt(px * px + py * py);
-                if (distance > radius) continue;
-                float hue = (float) ((Math.atan2(py, px) / (Math.PI * 2.0) + 1.0) % 1.0);
-                float saturation = Math.min(1.0f, distance / radius);
-                g.fill(x + px, y + py, x + px + 1, y + py + 1,
-                        hsv(hue, saturation, 1.0f));
-            }
+    private void drawColorPicker(GuiGraphicsExtractor g) {
+        int x = panelX + 22;
+        int y = panelY + panelH - 35;
+        int w = 132, h = 9;
+        int segments = 72;
+        for (int i = 0; i < segments; i++) {
+            int left = x + i * w / segments;
+            int right = x + (i + 1) * w / segments;
+            float hue = i / (float) (segments - 1);
+            g.fill(left, y, right, y + h, hsv(hue, 1.0f, 1.0f));
         }
-        GlassSurface.rounded(g, x - 4, y - 4, 8, 8, 4, MenuTheme.accent());
-        GlassSurface.rounded(g, x - 2, y - 2, 4, 4, 2, 0xFFF7F8FC);
-        g.text(font, "MENU COLOR", panelX + 91, y - 8, 0xFFDCE5F2, false);
-        g.text(font, "PICK A SHADE", panelX + 91, y + 8, 0xFF8797B0, false);
+        int marker = x + Math.round(MenuTheme.hueFraction() * (w - 1));
+        GlassSurface.rounded(g, marker - 3, y - 3, 7, h + 6, 3, 0xFFFFFFFF);
+        GlassSurface.rounded(g, marker - 1, y - 1, 3, h + 2, 1, MenuTheme.accent());
     }
 
     private static int hsv(float hue, float saturation, float value) {
@@ -139,24 +128,11 @@ public final class MoonMenuScreen extends Screen {
 
     private void drawControls(GuiGraphicsExtractor g, int mx, int my) {
         int x = contentX;
-        g.text(font, "THE NIGHT SHIFT", x, panelY + 27, 0xFFF0F4FC, false);
-        g.text(font, "Choose what appears in your world.", x, panelY + 47, 0xFF9AA9BF, false);
-        g.text(font, "V2.1", panelX + panelW - 54, panelY + 28, 0xFF9EADC1, false);
+        g.text(font, group.toUpperCase(), x, panelY + 24, 0xFFF0F4FC, false);
+        g.text(font, "A clean glass view of your modules.", x, panelY + 43, 0xFF9AA9BF, false);
+        g.text(font, "MOON MENU", panelX + panelW - 93, panelY + 28, 0xFF9EADC1, false);
 
-        int tabX = x, tabY = panelY + 78;
-        for (String item : GROUPS) {
-            int w = font.width(item) + 24;
-            boolean active = group.equals(item);
-            boolean hover = inside(mx, my, tabX, tabY, w, 26);
-            if (active || hover) {
-                GlassSurface.rounded(g, tabX, tabY, w, 26, 9,
-                        active ? MenuTheme.accentWithAlpha(0x65) : 0x2BDAE5F4);
-            }
-            g.text(font, item, tabX + 12, tabY + 8,
-                    active ? 0xFFF4F7FC : 0xFF9AA9BF, false);
-            if (active) g.fill(tabX + 12, tabY + 23, tabX + w - 12, tabY + 24, MenuTheme.accentWithAlpha(0xD0));
-            tabX += w + 7;
-        }
+        
 
         int index = 0;
         for (ModuleSpec module : ModuleSpec.ALL) {
@@ -169,27 +145,29 @@ public final class MoonMenuScreen extends Screen {
             int rx = contentX;
             int ry = contentY + visibleIndex * (rowH + 5);
             index++;
-            if (ry + rowH > panelY + panelH - 34) continue;
+            if (ry + rowH > panelY + panelH - 42) continue;
             boolean on = ModuleRuntime.isEnabled(module.name());
             boolean hover = inside(mx, my, rx, ry, rowW, rowH);
             if (hover || on) {
-                GlassSurface.rounded(g, rx, ry, rowW, rowH, 7,
+                GlassSurface.rounded(g, rx + 2, ry + 2, rowW - 4, rowH - 4, 7,
                         on ? MenuTheme.accentWithAlpha(0x55) : 0x328093B0);
             } else {
-                GlassSurface.rounded(g, rx, ry, rowW, rowH, 7, 0x1E9AAAC2);
+                GlassSurface.rounded(g, rx + 2, ry + 2, rowW - 4, rowH - 4, 7, 0x1E9AAAC2);
             }
-            g.text(font, fit(module.name(), rowW - 112), rx + 12, ry + 7,
+            g.text(font, fit(module.name(), rowW - 160), rx + 13, ry + 5,
                     0xFFEAF0FA, false);
-            g.text(font, on ? "ON" : "OFF", rx + rowW - 79, ry + 7,
+            g.text(font, fit(module.description(), rowW - 160), rx + 13, ry + 18,
+                    0xFF9AA9BF, false);
+            g.text(font, on ? "ON" : "OFF", rx + rowW - 79, ry + 10,
                     on ? 0xFFDCE8F7 : 0xFF8998AF, false);
             int tx = rx + rowW - 38;
-            GlassSurface.rounded(g, tx, ry + 5, 25, 12, 7,
+            GlassSurface.rounded(g, tx, ry + 10, 25, 12, 7,
                     on ? MenuTheme.accentWithAlpha(0xD0) : 0x53677891);
-            GlassSurface.rounded(g, on ? tx + 14 : tx + 2, ry + 6, 9, 9, 5, 0xFFF3F6FC);
-            g.text(font, "···", rx + rowW - 104, ry + 5, 0xFF9EADC1, false);
+            GlassSurface.rounded(g, on ? tx + 14 : tx + 2, ry + 11, 9, 9, 5, 0xFFF3F6FC);
+            g.text(font, "···", rx + rowW - 104, ry + 8, 0xFF9EADC1, false);
         }
         int pages = Math.max(1, (countForGroup() + PAGE_SIZE - 1) / PAGE_SIZE);
-        int footerY = panelY + panelH - 24;
+        int footerY = panelY + panelH - 25;
         g.text(font, "PAGE " + (page + 1) + " / " + pages, contentX, footerY,
                 0xFF9AA9BF, false);
         g.text(font, "‹", contentX + contentW - 42, footerY - 3,
@@ -216,24 +194,21 @@ public final class MoonMenuScreen extends Screen {
     public boolean mouseClicked(MouseButtonEvent event, boolean doubled) {
         double mx = event.x(), my = event.y();
 
-        int wheelX = panelX + 54, wheelY = panelY + panelH - 104;
-        double wheelDx = mx - wheelX, wheelDy = my - wheelY;
-        if (wheelDx * wheelDx + wheelDy * wheelDy <= 25 * 25) {
-            float hue = (float) ((Math.atan2(wheelDy, wheelDx) / (Math.PI * 2.0) + 1.0) % 1.0);
-            float saturation = (float) Math.min(1.0, Math.sqrt(wheelDx * wheelDx + wheelDy * wheelDy) / 25.0);
-            MenuTheme.setAccent(hsv(hue, saturation, 1.0f));
+                int pickerX = panelX + 22, pickerY = panelY + panelH - 35;
+        if (inside(mx, my, pickerX, pickerY - 3, 132, 15)) {
+            float hue = (float) Math.max(0, Math.min(1, (mx - pickerX) / 132.0));
+            MenuTheme.setAccent(hsv(hue, 1.0f, 1.0f));
             return true;
         }
-        int tabX = contentX, tabY = panelY + 78;
+        int navY = panelY + 76;
         for (String item : GROUPS) {
-            int w = font.width(item) + 24;
-            if (inside(mx, my, tabX, tabY, w, 26)) {
+            if (inside(mx, my, panelX + 17, navY - 5, 137, 30)) {
                 group = item;
                 page = 0;
                 selected = null;
                 return true;
             }
-            tabX += w + 7;
+            navY += 36;
         }
 
         int pages = Math.max(1, (countForGroup() + PAGE_SIZE - 1) / PAGE_SIZE);
