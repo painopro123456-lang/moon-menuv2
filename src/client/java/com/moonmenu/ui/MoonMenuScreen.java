@@ -242,13 +242,14 @@ public final class MoonMenuScreen extends Screen {
     }
 
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
+    public boolean mouseDragged(MouseButtonEvent event, double dragX, double dragY) {
+        double mouseX = event.x(), mouseY = event.y();
         int pickerX = panelX + 22, pickerY = panelY + panelH - 35;
         if (inside(mouseX, mouseY, pickerX - 5, pickerY - 7, 142, 23)) {
             updateAccentFromPointer(mouseX, pickerX);
             return true;
         }
-        return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
+        return super.mouseDragged(event, dragX, dragY);
     }
 
     private void updateAccentFromPointer(double mouseX, int pickerX) {
