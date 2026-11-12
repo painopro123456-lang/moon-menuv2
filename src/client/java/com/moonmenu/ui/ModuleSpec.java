@@ -22,7 +22,4 @@ public record ModuleSpec(String name, String description, String group, String g
             new ModuleSpec("Compact Chat", "Reduce chat visual footprint", "Chat", "≡")
     );
 
-    private ModuleSpec() {
-        this("", "", "", "");
-    }
 }
