@@ -33,11 +33,11 @@ public final class VloxScreen extends Screen {
 	}
 	private static final int ROW_GAP = 10;
 	private static final int GRID_COLUMNS = 4;
-	private static final int RAIL_WIDTH = 0;
+	private static final int RAIL_WIDTH = 154;
 	private static final int FOOTER_HEIGHT = 32;
 
-	private static final int GLASS = 0x42FFFFFF;
-	private static final int PANEL_BG = GLASS;
+	private static final int GLASS = 0x2EFFFFFF;
+	private static final int PANEL_BG = 0x35FFFFFF;
 	private static final int RAIL_BG = GLASS;
 	private static final int ROW_HOVER = GLASS;
 	private static final int ROW_ALT = GLASS;
@@ -188,12 +188,12 @@ public final class VloxScreen extends Screen {
 
 	@Override
 	protected void init() {
-		this.panelWidth = Math.min(900, this.width - 40);
-		this.panelHeight = Math.min(560, this.height - 40);
+		this.panelWidth = Math.min(840, this.width - 40);
+		this.panelHeight = Math.min(520, this.height - 40);
 		this.panelX = (this.width - this.panelWidth) / 2;
 		this.panelY = (this.height - this.panelHeight) / 2;
 
-		this.contentX = this.panelX;
+		this.contentX = this.panelX + RAIL_WIDTH;
 		this.contentWidth = this.panelWidth - RAIL_WIDTH;
 		this.listY = this.panelY + 126;
 		this.listHeight = this.panelHeight - 126 - FOOTER_HEIGHT;
@@ -217,6 +217,7 @@ public final class VloxScreen extends Screen {
 		String needle = query.trim().toLowerCase();
 
 		for (Feature feature : Features.ALL) {
+			if (feature.category != category) continue;
 			if (!needle.isEmpty()
 					&& !feature.label.toLowerCase().contains(needle)
 					&& !feature.id.toLowerCase().contains(needle)
@@ -347,11 +348,34 @@ public final class VloxScreen extends Screen {
 	}
 
 	private void drawRail(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
-		int x = this.panelX + 20;
-		Ui.rounded(graphics, x, this.panelY + 17, 24, 24, 8, GLASS);
-		Ui.textScaled(graphics, this.font, "M", x + 7, this.panelY + 22, Ui.TEXT, 1.35F);
-		Ui.textScaled(graphics, this.font, "MOON MENU", x + 34, this.panelY + 18, Ui.TEXT, 1.55F);
-		Ui.text(graphics, this.font, "A cleaner way to control your client", x + 35, this.panelY + 40, Ui.MUTED);
+		int x = this.panelX + 18;
+		Ui.rounded(graphics, x, this.panelY + 18, 28, 28, 9, 0x65FFFFFF);
+		Ui.textScaled(graphics, this.font, "M", x + 9, this.panelY + 25, Ui.TEXT, 1.35F);
+		Ui.textScaled(graphics, this.font, "MOON MENU", x + 38, this.panelY + 20, Ui.TEXT, 1.25F);
+		Ui.text(graphics, this.font, "CLIENT SETTINGS", x + 39, this.panelY + 39, Ui.MUTED);
+
+		graphics.fill(this.panelX + RAIL_WIDTH - 1, this.panelY + 16, this.panelX + RAIL_WIDTH,
+				this.panelY + this.panelHeight - 16, 0x36FFFFFF);
+
+		int navY = this.panelY + 94;
+		for (Category cat : Category.values()) {
+			boolean selected = this.category == cat;
+			boolean hovered = Ui.inside(mouseX, mouseY, this.panelX + 12, navY - 5, RAIL_WIDTH - 24, 31);
+			if (selected) {
+				Ui.rounded(graphics, this.panelX + 12, navY - 5, RAIL_WIDTH - 24, 31, 9, 0x65FFFFFF);
+				graphics.fill(this.panelX + 12, navY + 3, this.panelX + 14, navY + 18, 0xFFFFFFFF);
+			} else if (hovered) {
+				Ui.rounded(graphics, this.panelX + 12, navY - 5, RAIL_WIDTH - 24, 31, 9, 0x28FFFFFF);
+			}
+			Ui.text(graphics, this.font, cat.label, this.panelX + 27, navY + 5, selected ? Ui.TEXT : Ui.MUTED);
+			String count = Integer.toString(countIn(cat));
+			Ui.text(graphics, this.font, count, this.panelX + RAIL_WIDTH - 29 - this.font.width(count),
+					navY + 5, Ui.FAINT);
+			navY += 39;
+		}
+
+		Ui.text(graphics, this.font, "MOON MENU  V2", this.panelX + 20,
+				this.panelY + this.panelHeight - 29, Ui.FAINT);
 		String game = "MINECRAFT 26.2  /  FABRIC";
 		int tagWidth = this.font.width(game) + 20;
 		int tagX = this.panelX + this.panelWidth - tagWidth - 20;
@@ -593,6 +617,19 @@ public final class VloxScreen extends Screen {
 	public boolean mouseClicked(MouseButtonEvent event, boolean doubled) {
 		double mouseX = event.x();
 		double mouseY = event.y();
+
+		int navY = this.panelY + 94;
+		for (Category cat : Category.values()) {
+			if (Ui.inside(mouseX, mouseY, this.panelX + 12, navY - 5, RAIL_WIDTH - 24, 31)) {
+				this.category = cat;
+				lastCategory = cat;
+				this.scrollTarget = 0;
+				this.scrollShown = 0;
+				refresh();
+				return true;
+			}
+			navY += 39;
+		}
 
 		if (Ui.inside(mouseX, mouseY, this.searchX, this.searchY, this.searchWidth, this.searchHeight)) {
 			this.searchFocused = true;
