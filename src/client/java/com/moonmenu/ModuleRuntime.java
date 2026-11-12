@@ -133,7 +133,7 @@ public final class ModuleRuntime {
                     ? "Empty" : client.player.getMainHandItem().getHoverName().getString();
             y = line(graphics, client, "HELD  " + item, y);
         }
-        if (isEnabled("Durability") || isEnabled("Armor Status")) {
+        if (isEnabled("Durability")) {
             var stack = client.player.getMainHandItem();
             if (!stack.isEmpty() && stack.isDamageableItem()) {
                 int remaining = stack.getMaxDamage() - stack.getDamageValue();
@@ -260,23 +260,13 @@ public final class ModuleRuntime {
             if (isEnabled("Arrow Count")) y = line(graphics, client, "ARROWS  " + arrows, y);
             if (isEnabled("Projectile Count")) y = line(graphics, client, "PROJECTILES  " + projectiles, y);
         }
-        if (isEnabled("Armor Durability") || isEnabled("Armor Status")) {
-            var inventory = client.player.getInventory();
-            String[] labels = {"BOOTS", "LEGS", "CHEST", "HELM"};
-            net.minecraft.world.entity.EquipmentSlot[] slots = {
-                    net.minecraft.world.entity.EquipmentSlot.FEET,
-                    net.minecraft.world.entity.EquipmentSlot.LEGS,
-                    net.minecraft.world.entity.EquipmentSlot.CHEST,
-                    net.minecraft.world.entity.EquipmentSlot.HEAD
-            };
-            for (int i = 0; i < slots.length; i++) {
-                var stack = client.player.getItemBySlot(slots[i]);
-                if (!stack.isEmpty() && stack.isDamageableItem()) {
-                    int remaining = stack.getMaxDamage() - stack.getDamageValue();
-                    int percent = Math.round(remaining * 100.0f / stack.getMaxDamage());
-                    y = line(graphics, client, labels[i] + "  " + percent + "%", y);
-                }
-            }
+        if (isEnabled("Armor Status") || isEnabled("Armor Durability")) {
+            String armor = "ARMOR  "
+                    + armorPiece(client.player.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.HEAD), "H")
+                    + "  ·  " + armorPiece(client.player.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.CHEST), "C")
+                    + "  ·  " + armorPiece(client.player.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.LEGS), "L")
+                    + "  ·  " + armorPiece(client.player.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.FEET), "B");
+            y = line(graphics, client, armor, y);
         }
         if (isEnabled("Durability Percent")) {
             var stack = client.player.getMainHandItem();
@@ -346,6 +336,15 @@ public final class ModuleRuntime {
         if (isEnabled("Totem Count") || isEnabled("Arrow Count") || isEnabled("Projectile Count")) {
             // Counts are rendered in the shared inventory counter block above.
         }
+    }
+
+    private static String armorPiece(net.minecraft.world.item.ItemStack stack, String label) {
+        if (stack.isEmpty()) return label + " —";
+        if (!stack.isDamageableItem()) return label + " ✓";
+        int max = stack.getMaxDamage();
+        int remaining = Math.max(0, max - stack.getDamageValue());
+        int percent = max <= 0 ? 100 : Math.round(remaining * 100.0f / max);
+        return label + " " + remaining + "/" + max + " (" + percent + "%)";
     }
 
     private static int line(net.minecraft.client.gui.GuiGraphicsExtractor graphics,
