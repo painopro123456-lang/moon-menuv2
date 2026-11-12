@@ -36,11 +36,11 @@ public final class VloxScreen extends Screen {
 	private static final int RAIL_WIDTH = 154;
 	private static final int FOOTER_HEIGHT = 32;
 
-	private static final int GLASS = 0x2EFFFFFF;
-	private static final int PANEL_BG = 0x35FFFFFF;
-	private static final int RAIL_BG = GLASS;
-	private static final int ROW_HOVER = GLASS;
-	private static final int ROW_ALT = GLASS;
+	private static final int GLASS = 0x38FFFFFF;
+	private static final int PANEL_BG = 0x24FFFFFF;
+	private static final int RAIL_BG = 0x24FFFFFF;
+	private static final int ROW_HOVER = 0x48FFFFFF;
+	private static final int ROW_ALT = 0x30FFFFFF;
 
 	private static final Map<String, String> MODULE_ICONS = Map.ofEntries(
 			Map.entry("hud.enabled", "beacon"),
@@ -298,8 +298,8 @@ public final class VloxScreen extends Screen {
 			}
 
 			boolean toggleControl = (option != null && isBooleanOption(option)) || (option == null && feature.type == Feature.Type.TOGGLE);
-			int controlX = x + cardWidth - controlWidth - 10;
-			int controlY = y + 12;
+			int controlX = x + (cardWidth - controlWidth) / 2;
+			int controlY = y + cardHeight() - controlHeight - 9;
 			rows.add(new Row(feature, y, x, cardWidth, controlX, controlY, controlWidth, controlHeight));
 		}
 	}
@@ -349,38 +349,41 @@ public final class VloxScreen extends Screen {
 
 	private void drawRail(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
 		int x = this.panelX + 18;
-		Ui.rounded(graphics, x, this.panelY + 18, 28, 28, 9, 0x65FFFFFF);
-		Ui.textScaled(graphics, this.font, "M", x + 9, this.panelY + 25, Ui.TEXT, 1.35F);
-		Ui.textScaled(graphics, this.font, "MOON MENU", x + 38, this.panelY + 20, Ui.TEXT, 1.25F);
-		Ui.text(graphics, this.font, "CLIENT SETTINGS", x + 39, this.panelY + 39, Ui.MUTED);
+		// Brand block: a compact glass tile with a strong wordmark.
+		Ui.rounded(graphics, x, this.panelY + 18, 34, 34, 11, 0x6AFFFFFF);
+		graphics.fill(x + 7, this.panelY + 24, x + 27, this.panelY + 25, 0xBFFFFFFF);
+		Ui.textScaled(graphics, this.font, "M", x + 11, this.panelY + 27, Ui.TEXT, 1.25F);
+		Ui.textScaled(graphics, this.font, "MOON", x + 43, this.panelY + 20, Ui.TEXT, 1.18F);
+		Ui.text(graphics, this.font, "CLIENT  /  V2", x + 44, this.panelY + 39, Ui.MUTED);
 
 		graphics.fill(this.panelX + RAIL_WIDTH - 1, this.panelY + 16, this.panelX + RAIL_WIDTH,
-				this.panelY + this.panelHeight - 16, 0x36FFFFFF);
+				this.panelY + this.panelHeight - 16, 0x42FFFFFF);
 
-		int navY = this.panelY + 94;
+		Ui.text(graphics, this.font, "WORKSPACE", this.panelX + 22, this.panelY + 78, Ui.FAINT);
+		int navY = this.panelY + 99;
 		for (Category cat : Category.values()) {
 			boolean selected = this.category == cat;
-			boolean hovered = Ui.inside(mouseX, mouseY, this.panelX + 12, navY - 5, RAIL_WIDTH - 24, 31);
+			boolean hovered = Ui.inside(mouseX, mouseY, this.panelX + 12, navY - 5, RAIL_WIDTH - 24, 34);
 			if (selected) {
-				Ui.rounded(graphics, this.panelX + 12, navY - 5, RAIL_WIDTH - 24, 31, 9, 0x65FFFFFF);
-				graphics.fill(this.panelX + 12, navY + 3, this.panelX + 14, navY + 18, 0xFFFFFFFF);
+				Ui.rounded(graphics, this.panelX + 12, navY - 5, RAIL_WIDTH - 24, 34, 10, 0x72FFFFFF);
+				graphics.fill(this.panelX + 12, navY + 4, this.panelX + 14, navY + 20, 0xFF526F91);
 			} else if (hovered) {
-				Ui.rounded(graphics, this.panelX + 12, navY - 5, RAIL_WIDTH - 24, 31, 9, 0x28FFFFFF);
+				Ui.rounded(graphics, this.panelX + 12, navY - 5, RAIL_WIDTH - 24, 34, 10, 0x32FFFFFF);
 			}
-			Ui.text(graphics, this.font, cat.label, this.panelX + 27, navY + 5, selected ? Ui.TEXT : Ui.MUTED);
+			Ui.text(graphics, this.font, cat.label, this.panelX + 27, navY + 7,
+					selected ? 0xFF172638 : Ui.MUTED);
 			String count = Integer.toString(countIn(cat));
-			Ui.text(graphics, this.font, count, this.panelX + RAIL_WIDTH - 29 - this.font.width(count),
-					navY + 5, Ui.FAINT);
-			navY += 39;
+			Ui.rounded(graphics, this.panelX + RAIL_WIDTH - 39, navY + 3, 22, 18, 7,
+					selected ? 0x55FFFFFF : 0x20FFFFFF);
+			Ui.text(graphics, this.font, count, this.panelX + RAIL_WIDTH - 28 - this.font.width(count) / 2,
+					navY + 8, selected ? Ui.TEXT : Ui.FAINT);
+			navY += 41;
 		}
 
-		Ui.text(graphics, this.font, "MOON MENU  V2", this.panelX + 20,
-				this.panelY + this.panelHeight - 29, Ui.FAINT);
-		String game = "MINECRAFT 26.2  /  FABRIC";
-		int tagWidth = this.font.width(game) + 20;
-		int tagX = this.panelX + this.panelWidth - tagWidth - 20;
-		Ui.rounded(graphics, tagX, this.panelY + 20, tagWidth, 22, 8, GLASS);
-		Ui.text(graphics, this.font, game, tagX + 10, this.panelY + 27, Ui.MUTED);
+		int footerY = this.panelY + this.panelHeight - 48;
+		graphics.fill(this.panelX + 18, footerY - 9, this.panelX + RAIL_WIDTH - 18, footerY - 8, 0x35FFFFFF);
+		Ui.text(graphics, this.font, "MOON MENU V2", this.panelX + 20, footerY + 1, Ui.MUTED);
+		Ui.text(graphics, this.font, "FABRIC 26.2", this.panelX + 20, footerY + 15, Ui.FAINT);
 	}
 
 	private int countIn(Category cat) {
@@ -394,17 +397,20 @@ public final class VloxScreen extends Screen {
 	}
 
 	private void drawHeader(GuiGraphicsExtractor graphics) {
-		Ui.text(graphics, this.font, "MODULES", this.contentX + 20, this.panelY + 75, Ui.TEXT);
-		String count = this.visible.size() + " available";
+		Ui.textScaled(graphics, this.font, "MODULE LIBRARY", this.contentX + 20,
+				this.panelY + 48, Ui.TEXT, 1.12F);
+		String count = this.visible.size() + " modules in " + this.category.label;
 		if (VloxConfig.flag(Features.MENU_SHOW_FPS)) {
-			count += "   ·   " + Minecraft.getInstance().getFps() + " FPS";
+			count += "   /   " + Minecraft.getInstance().getFps() + " FPS";
 		}
-		Ui.text(graphics, this.font, count, this.contentX + 20, this.panelY + 92, Ui.MUTED);
+		Ui.text(graphics, this.font, count, this.contentX + 20, this.panelY + 68, Ui.MUTED);
 
-		Ui.rounded(graphics, this.searchX, this.searchY, this.searchWidth, 24, 9, GLASS);
-		graphics.fill(this.searchX + 12, this.searchY + 8, this.searchX + 13, this.searchY + 17, Ui.MUTED);
-		graphics.fill(this.searchX + 9, this.searchY + 11, this.searchX + 16, this.searchY + 12, Ui.MUTED);
-		String shown = this.query.isEmpty() ? "Search modules..." : this.query;
+		Ui.rounded(graphics, this.searchX - 1, this.searchY - 1, this.searchWidth + 2, 26, 10, 0x30000000);
+		Ui.rounded(graphics, this.searchX, this.searchY, this.searchWidth, 24, 9, 0x48FFFFFF);
+		// Minimal magnifier glyph.
+		graphics.fill(this.searchX + 12, this.searchY + 7, this.searchX + 14, this.searchY + 15, 0xFF65778A);
+		graphics.fill(this.searchX + 10, this.searchY + 9, this.searchX + 16, this.searchY + 11, 0xFF65778A);
+		String shown = this.query.isEmpty() ? "Find a module..." : this.query;
 		Ui.text(graphics, this.font, Ui.fit(this.font, shown, this.searchWidth - 34), this.searchX + 23,
 				this.searchY + 8, this.query.isEmpty() ? Ui.MUTED : Ui.TEXT);
 		if (this.searchFocused && (System.currentTimeMillis() / 500L) % 2L == 0L) {
@@ -412,7 +418,7 @@ public final class VloxScreen extends Screen {
 			graphics.fill(caretX, this.searchY + 7, caretX + 1, this.searchY + 18, Ui.TEXT);
 		}
 		graphics.fill(this.contentX + 20, this.listY - 9, this.contentX + this.contentWidth - 20,
-				this.listY - 8, 0x50FFFFFF);
+				this.listY - 8, 0x45FFFFFF);
 	}
 
 	private void drawRows(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float dt) {
@@ -431,30 +437,41 @@ public final class VloxScreen extends Screen {
 			boolean enabled = option != null && option.get() instanceof Boolean value
 					? value : option == null && feature.type == Feature.Type.TOGGLE && VloxConfig.flag(feature);
 
-			// One consistent frosted surface for every module. State is shown by the control, not a green tile.
-			Ui.rounded(graphics, row.x(), row.y(), row.width(), cardHeight() - 2, 9, GLASS);
-			graphics.fill(row.x() + 9, row.y() + 1, row.x() + row.width() - 9, row.y() + 2, 0x38FFFFFF);
-			if (hovered && next > 0.05F) {
-				graphics.fill(row.x() + 9, row.y() + cardHeight() - 4, row.x() + row.width() - 9,
-						row.y() + cardHeight() - 3, Ui.alpha(0xFFFFFFFF, (int) (90 * next)));
+			// Layered shadow + frosted glass surface; every card follows the same neutral system.
+			Ui.rounded(graphics, row.x() + 1, row.y() + 3, row.width(), cardHeight() - 2, 11, 0x30000000);
+			Ui.rounded(graphics, row.x(), row.y(), row.width(), cardHeight() - 5, 11,
+					hovered ? 0x55FFFFFF : 0x38FFFFFF);
+			graphics.fill(row.x() + 11, row.y() + 1, row.x() + row.width() - 11, row.y() + 2, 0x55FFFFFF);
+			graphics.fill(row.x() + 10, row.y() + cardHeight() - 7, row.x() + row.width() - 10,
+					row.y() + cardHeight() - 6, 0x24FFFFFF);
+			if (hovered && next > 0.02F) {
+				Ui.rounded(graphics, row.x(), row.y(), row.width(), cardHeight() - 5, 11,
+						Ui.alpha(0xFFFFFFFF, (int) (18 * next)));
 			}
 
 			String iconId = MODULE_ICONS.get(feature.id);
 			if (iconId != null) {
+				int badgeX = row.x() + (row.width() - 34) / 2;
+				Ui.rounded(graphics, badgeX + 1, row.y() + 8, 34, 34, 11, 0x28000000);
+				Ui.rounded(graphics, badgeX, row.y() + 7, 34, 34, 11,
+						enabled ? 0x68FFFFFF : 0x42FFFFFF);
 				ItemStack icon = new ItemStack(BuiltInRegistries.ITEM.getValue(Identifier.fromNamespaceAndPath("minecraft", iconId)));
-				graphics.item(icon, row.x() + 12, row.y() + 11);
+				graphics.item(icon, badgeX + 9, row.y() + 16);
 			}
 
-			String label = Ui.fit(this.font, feature.label, row.width() - 24);
-			Ui.text(graphics, this.font, label, row.x() + 12, row.y() + 36, Ui.TEXT);
+			String label = Ui.fit(this.font, feature.label, row.width() - 14);
+			int labelX = row.x() + (row.width() - this.font.width(label)) / 2;
+			Ui.text(graphics, this.font, label, labelX, row.y() + 45, Ui.TEXT);
 			if (VloxConfig.flag(Features.MENU_DESCRIPTIONS) && !VloxConfig.flag(Features.MENU_COMPACT)) {
-				String description = Ui.fit(this.font, feature.description, row.width() - 24);
-				Ui.text(graphics, this.font, description, row.x() + 12, row.y() + 53, Ui.MUTED);
+				String description = Ui.fit(this.font, feature.description, row.width() - 16);
+				int descX = row.x() + (row.width() - this.font.width(description)) / 2;
+				Ui.text(graphics, this.font, description, descX, row.y() + 58, Ui.MUTED);
 			}
 
 			drawControl(graphics, row, mouseX, mouseY, dt);
 		}
 	}
+
 	private void drawControl(GuiGraphicsExtractor graphics, Row row, int mouseX, int mouseY, float dt) {
 		Feature feature = row.feature();
 		OptionInstance<?> option = Features.optionFor(feature);
