@@ -87,9 +87,8 @@ public final class MoonMenuScreen extends Screen {
         }
 
         int editorY = panelY + 222;
-        boolean editorHover = inside(Minecraft.getInstance().mouseHandler.xpos() * width / Math.max(1, Minecraft.getInstance().getWindow().getScreenWidth()), Minecraft.getInstance().mouseHandler.ypos() * height / Math.max(1, Minecraft.getInstance().getWindow().getScreenHeight()), left - 5, editorY - 5, 137, 27);
         GlassSurface.rounded(g, left - 5, editorY - 5, 137, 27, 7,
-                editorHover ? MenuTheme.accentWithAlpha(0x70) : MenuTheme.tint(0x328093B0, 0.22f));
+                MenuTheme.tint(0x328093B0, 0.22f));
         g.text(font, "HUD EDITOR  ↗", left + 7, editorY + 3, MenuTheme.accent(), false);
         g.text(font, ModuleSpec.ALL.size() + " TOTAL MODULES", left, panelY + 260,
                 0xFF9AA9BF, false);
