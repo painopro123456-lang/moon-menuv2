@@ -31,14 +31,19 @@ final class GlassSurface {
             g.fill(x, y, x + w, y + h, color);
             return;
         }
-        g.fill(x + radius, y, x + w - radius, y + h, color);
-        g.fill(x, y + radius, x + radius, y + h - radius, color);
-        g.fill(x + w - radius, y + radius, x + w, y + h - radius, color);
-        for (int row = 0; row < radius; row++) {
-            int dy = radius - row - 1;
-            int inset = radius - (int) Math.sqrt(Math.max(0, radius * radius - dy * dy));
+
+        // Draw each scanline exactly once. Layering overlapping translucent
+        // rectangles created a visible vertical stripe through every icon.
+        for (int row = 0; row < h; row++) {
+            int inset = 0;
+            if (row < radius) {
+                int dy = radius - row;
+                inset = radius - (int) Math.sqrt(Math.max(0, radius * radius - dy * dy));
+            } else if (row >= h - radius) {
+                int dy = row - (h - radius - 1);
+                inset = radius - (int) Math.sqrt(Math.max(0, radius * radius - dy * dy));
+            }
             g.fill(x + inset, y + row, x + w - inset, y + row + 1, color);
-            g.fill(x + inset, y + h - row - 1, x + w - inset, y + h - row, color);
         }
     }
 }
