@@ -36,10 +36,14 @@ public final class HudEditorScreen extends Screen {
             String label = item.getKey();
             int w = Math.max(90, font.width(label) + 18);
             int h = 20;
-            g.fill(e.x() - 5, e.y() - 4, e.x() + w, e.y() + h, 0x553B6B9C);
-            g.fill(e.x() - 5, e.y() - 4, e.x() + w, e.y() - 3, 0xFF9BCBFF);
-            g.text(font, label + "  " + Math.round(e.scale() * 100) + "%", e.x(), e.y(),
+            g.pose().pushMatrix();
+            g.pose().translate((float) e.x(), (float) e.y());
+            g.pose().scale(e.scale(), e.scale());
+            g.fill(-5, -4, w, h, 0x553B6B9C);
+            g.fill(-5, -4, w, -3, 0xFF9BCBFF);
+            g.text(font, label + "  " + Math.round(e.scale() * 100) + "%", 0, 0,
                     0xFFFFFFFF, true);
+            g.pose().popMatrix();
         }
         super.extractRenderState(g, mouseX, mouseY, delta);
     }
@@ -50,7 +54,10 @@ public final class HudEditorScreen extends Screen {
         for (Map.Entry<String, HudLayout.Entry> item : HudLayout.entries().entrySet()) {
             HudLayout.Entry e = item.getValue();
             int w = Math.max(90, font.width(item.getKey()) + 18);
-            if (mx >= e.x() - 5 && mx <= e.x() + w && my >= e.y() - 4 && my <= e.y() + 20) {
+            int scaledW = Math.round((w + 5) * e.scale());
+            int scaledH = Math.round(24 * e.scale());
+            if (mx >= e.x() - 5 * e.scale() && mx <= e.x() + scaledW
+                    && my >= e.y() - 4 * e.scale() && my <= e.y() + scaledH) {
                 dragging = item.getKey();
                 grabX = mx - e.x();
                 grabY = my - e.y();
@@ -81,7 +88,10 @@ public final class HudEditorScreen extends Screen {
         for (Map.Entry<String, HudLayout.Entry> item : HudLayout.entries().entrySet()) {
             HudLayout.Entry e = item.getValue();
             int w = Math.max(90, font.width(item.getKey()) + 18);
-            if (mouseX >= e.x() - 5 && mouseX <= e.x() + w && mouseY >= e.y() - 4 && mouseY <= e.y() + 20) {
+            int scaledW = Math.round((w + 5) * e.scale());
+            int scaledH = Math.round(24 * e.scale());
+            if (mouseX >= e.x() - 5 * e.scale() && mouseX <= e.x() + scaledW
+                    && mouseY >= e.y() - 4 * e.scale() && mouseY <= e.y() + scaledH) {
                 HudLayout.set(item.getKey(), e.x(), e.y(), e.scale() + (verticalAmount > 0 ? 0.1f : -0.1f));
                 return true;
             }
