@@ -13,6 +13,21 @@ public final class MenuTheme {
         accent = 0xFF000000 | (color & 0x00FFFFFF);
     }
 
+    public static float hueFraction() {
+        float r = ((accent >> 16) & 255) / 255.0f;
+        float g = ((accent >> 8) & 255) / 255.0f;
+        float b = (accent & 255) / 255.0f;
+        float max = Math.max(r, Math.max(g, b));
+        float min = Math.min(r, Math.min(g, b));
+        float delta = max - min;
+        if (delta == 0) return 0.0f;
+        float hue;
+        if (max == r) hue = ((g - b) / delta) % 6.0f;
+        else if (max == g) hue = (b - r) / delta + 2.0f;
+        else hue = (r - g) / delta + 4.0f;
+        return (hue / 6.0f + 1.0f) % 1.0f;
+    }
+
     public static int accentWithAlpha(int alpha) {
         return ((alpha & 0xFF) << 24) | (accent & 0x00FFFFFF);
     }
