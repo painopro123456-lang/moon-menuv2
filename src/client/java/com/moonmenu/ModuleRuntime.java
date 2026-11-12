@@ -301,7 +301,7 @@ public final class ModuleRuntime {
         }
         if (isEnabled("Biome") || isEnabled("Biome Temperature")) {
             var biome = client.level.getBiome(client.player.blockPosition());
-            String biomeName = biome.unwrapKey().map(key -> key.location().toString()).orElse("Unknown");
+            String biomeName = biome.toString();
             y = line(graphics, client, "BIOME  " + biomeName, y);
         }
         if (isEnabled("Session Time")) {
@@ -327,10 +327,7 @@ public final class ModuleRuntime {
             if (isEnabled("Passive Count")) y = line(graphics, client, "PASSIVE  " + passive, y);
         }
         if (isEnabled("Deaths")) y = line(graphics, client, "DEATHS  " + sessionDeaths, y);
-        if (isEnabled("Local Difficulty")) {
-            y = line(graphics, client, "LOCAL DIFFICULTY  "
-                    + client.level.getCurrentDifficultyAt(client.player.blockPosition()).getEffectiveDifficulty(), y);
-        }
+        // Local difficulty is not exposed by the 26.2 client level API.
         if (isEnabled("Jump Distance")) {
             var velocity = client.player.getDeltaMovement();
             y = line(graphics, client, String.format("HORIZONTAL MOTION  %.2f",
