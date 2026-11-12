@@ -66,11 +66,25 @@ public final class MoonMenuScreen extends Screen {
         g.text(font, "CLIENT MOD  /  26.2", left, panelY + 42, 0xFF8F9DB4, false);
 
         int cx = panelX + 116, cy = panelY + 164;
-        GlassSurface.rounded(g, cx - 52, cy - 52, 104, 104, 52, 0x1ECCD9EC);
-        GlassSurface.rounded(g, cx - 43, cy - 43, 86, 86, 43, 0xDDEAF2FF);
-        GlassSurface.rounded(g, cx - 10, cy - 56, 86, 86, 43, 0xF0141B2B);
-        GlassSurface.rounded(g, cx + 27, cy - 16, 4, 4, 2, 0xC9DCE8FA);
-        GlassSurface.rounded(g, cx - 61, cy + 32, 3, 3, 1, 0xAFC4D5EC);
+        // Layered atmospheric halo: soft, wide rings behind the moon.
+        GlassSurface.rounded(g, cx - 66, cy - 66, 132, 132, 66, 0x102E4664);
+        GlassSurface.rounded(g, cx - 58, cy - 58, 116, 116, 58, 0x183D5878);
+        GlassSurface.rounded(g, cx - 51, cy - 51, 102, 102, 51, 0x286C829F);
+        // A fine outer rim and cool pearl surface.
+        GlassSurface.rounded(g, cx - 44, cy - 44, 88, 88, 44, 0x6CDAE7F8);
+        GlassSurface.rounded(g, cx - 40, cy - 40, 80, 80, 40, 0xFFE9F0FA);
+        // Offset shadow carves a clean crescent, leaving the illuminated
+        // silver edge on the left rather than a flat circle.
+        GlassSurface.rounded(g, cx - 4, cy - 51, 82, 82, 41, 0xF0141B2B);
+        // Delicate surface marks on the lit arc.
+        GlassSurface.rounded(g, cx - 29, cy - 16, 8, 8, 4, 0x2D8195AE);
+        GlassSurface.rounded(g, cx - 19, cy + 10, 5, 5, 3, 0x26788DA8);
+        GlassSurface.rounded(g, cx - 34, cy + 25, 3, 3, 2, 0x33788DA8);
+        // Tiny distant stars complete the moonlit focal point.
+        GlassSurface.rounded(g, cx + 53, cy - 37, 3, 3, 2, 0xD7E6F2FF);
+        GlassSurface.rounded(g, cx + 61, cy + 16, 2, 2, 1, 0xAFC4D5EC);
+        GlassSurface.rounded(g, cx - 61, cy - 49, 2, 2, 1, 0xAFC4D5EC);
+        GlassSurface.rounded(g, cx - 58, cy + 43, 3, 3, 2, 0xAFC4D5EC);
 
         g.text(font, group.toUpperCase(), left, panelY + 244, 0xFFE6EDF8, false);
         g.text(font, countForGroup() + " MODULES", left, panelY + 263, 0xFF9AA9BF, false);
