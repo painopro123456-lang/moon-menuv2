@@ -31,4 +31,17 @@ public final class MenuTheme {
     public static int accentWithAlpha(int alpha) {
         return ((alpha & 0xFF) << 24) | (accent & 0x00FFFFFF);
     }
+
+    /** Blend the selected accent into a base UI surface while preserving its alpha. */
+    public static int tint(int base, float amount) {
+        float a = Math.max(0.0f, Math.min(1.0f, amount));
+        int r = blend((base >> 16) & 255, (accent >> 16) & 255, a);
+        int g = blend((base >> 8) & 255, (accent >> 8) & 255, a);
+        int b = blend(base & 255, accent & 255, a);
+        return (base & 0xFF000000) | (r << 16) | (g << 8) | b;
+    }
+
+    private static int blend(int from, int to, float amount) {
+        return Math.round(from + (to - from) * amount);
+    }
 }
