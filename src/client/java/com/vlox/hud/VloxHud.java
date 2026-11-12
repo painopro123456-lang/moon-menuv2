@@ -89,16 +89,19 @@ public final class VloxHud implements HudElement {
 
 		boolean shadow = VloxConfig.flag(Features.HUD_SHADOW);
 		boolean backdropEnabled = VloxConfig.flag(Features.HUD_BACKGROUND);
-		int backdrop = Math.round(190 * (float) VloxConfig.get(Features.HUD_BACKDROP_OPACITY));
+		int backdrop = Math.round(218 * (float) VloxConfig.get(Features.HUD_BACKDROP_OPACITY));
 		int cursorY = PAD;
 		for (Row row : rows) {
-			int rowWidth = row.width(font) + 14;
-			int rowHeight = row.height(font) + 8;
+			int rowWidth = row.width(font) + 16;
+			int rowHeight = row.height(font) + 10;
 			if (backdropEnabled) {
-				Ui.rounded(graphics, PAD, cursorY, rowWidth, rowHeight, 5, Ui.alpha(0x0A0F15, backdrop));
-				graphics.fill(PAD, cursorY + 5, PAD + 2, cursorY + rowHeight - 5, Ui.accent());
+				// Separate glass tiles with a soft shadow and restrained highlight.
+				Ui.rounded(graphics, PAD + 1, cursorY + 3, rowWidth, rowHeight, 5, 0x55000000);
+				Ui.rounded(graphics, PAD, cursorY, rowWidth, rowHeight, 5, Ui.alpha(0x111923, backdrop));
+				Ui.rounded(graphics, PAD + 1, cursorY + 1, rowWidth - 2, rowHeight - 2, 4, 0x18000000);
+				graphics.fill(PAD + 5, cursorY + 1, PAD + rowWidth - 5, cursorY + 2, 0x26FFFFFF);
 			}
-			row.draw(graphics, font, PAD + 8, cursorY + 4, shadow);
+			row.draw(graphics, font, PAD + 8, cursorY + 5, shadow);
 			cursorY += rowHeight + gap;
 		}
 
@@ -327,8 +330,8 @@ public final class VloxHud implements HudElement {
 		int height = 0;
 		for (int i = 0; i < rows.size(); i++) {
 			Row row = rows.get(i);
-			textWidth = Math.max(textWidth, row.width(font) + 14);
-			height += row.height(font) + 8;
+			textWidth = Math.max(textWidth, row.width(font) + 16);
+			height += row.height(font) + 10;
 			if (i > 0) {
 				height += gap;
 			}
@@ -602,14 +605,14 @@ public final class VloxHud implements HudElement {
 
 		@Override
 		public void draw(GuiGraphicsExtractor graphics, Font font, int x, int y, boolean shadow) {
-						int split = this.text.indexOf("  ");
+			int split = this.text.indexOf("  ");
 			if (split > 0) {
 				String label = this.text.substring(0, split).trim();
 				String value = this.text.substring(split + 2).trim();
-				graphics.text(font, label, x, y, 0xFF9BAABD, shadow);
-				graphics.text(font, value, x + font.width(label) + 6, y, ON, shadow);
+				graphics.text(font, label, x, y, 0xFF9AA9BB, shadow);
+				graphics.text(font, value, x + font.width(label) + 7, y, 0xFFF5F8FC, shadow);
 			} else {
-				graphics.text(font, this.text, x, y, ON, shadow);
+				graphics.text(font, this.text, x, y, 0xFFF0F4F9, shadow);
 			}
 		}
 	}
@@ -658,7 +661,9 @@ public final class VloxHud implements HudElement {
 			for (int i = 0; i < 4; i++) {
 				int dx = x + i * (SLOT_WIDTH + SLOT_GAP);
 				ItemStack stack = this.stacks[i];
-				Ui.rounded(graphics, dx, y, SLOT_WIDTH, this.durability ? 34 : 20, 4, 0x50131B26);
+				Ui.rounded(graphics, dx + 1, y + 2, SLOT_WIDTH, this.durability ? 34 : 20, 4, 0x66000000);
+				Ui.rounded(graphics, dx, y, SLOT_WIDTH, this.durability ? 34 : 20, 4, 0xA51B2531);
+				graphics.fill(dx + 4, y + 1, dx + SLOT_WIDTH - 4, y + 2, 0x24FFFFFF);
 				if (stack.isEmpty()) {
 					graphics.centeredText(font, slotLabels[i], dx + SLOT_WIDTH / 2, y + 4, 0xFF69788A);
 					if (this.durability) {
@@ -673,8 +678,8 @@ public final class VloxHud implements HudElement {
 				int percent = stack.isDamageableItem()
 						? Math.round((stack.getMaxDamage() - stack.getDamageValue()) * 100.0F / stack.getMaxDamage())
 						: 100;
-				int color = percent > 60 ? 0xFF55E08A : percent > 25 ? 0xFFFFC857 : 0xFFFF626D;
-				graphics.centeredText(font, percent + "%", dx + SLOT_WIDTH / 2, y + 18, color);
+				int color = percent > 60 ? 0xFF65C7A1 : percent > 25 ? 0xFFE2B86F : 0xFFE07878;
+				graphics.centeredText(font, percent + "%", dx + SLOT_WIDTH / 2, y + 18, 0xFFEAF0F7);
 				graphics.fill(dx + 4, y + 29, dx + SLOT_WIDTH - 4, y + 31, 0x664B5664);
 				int barWidth = Math.round((SLOT_WIDTH - 8) * percent / 100.0F);
 				if (barWidth > 0) {
@@ -736,12 +741,15 @@ public final class VloxHud implements HudElement {
 
 		private static void key(GuiGraphicsExtractor graphics, Font font, int x, int y, int width, String label,
 				boolean pressed) {
-			int background = pressed ? Ui.alpha(Ui.accent(), 215) : 0x8A0A0F15;
-			int border = pressed ? Ui.accent() : 0x3AFFFFFF;
-			graphics.fill(x, y, x + width, y + KEY_HEIGHT, border);
-			graphics.fill(x + 1, y + 1, x + width - 1, y + KEY_HEIGHT - 1, background);
+			Ui.rounded(graphics, x + 1, y + 2, width, KEY_HEIGHT, 3, 0x70000000);
+			Ui.rounded(graphics, x, y, width, KEY_HEIGHT, 3, pressed ? 0xFFE8EDF4 : 0xB51B2531);
+			if (!pressed) {
+				graphics.fill(x + 3, y + 1, x + width - 3, y + 2, 0x24FFFFFF);
+			} else {
+				graphics.fill(x + 3, y + KEY_HEIGHT - 2, x + width - 3, y + KEY_HEIGHT - 1, 0x338A9DB5);
+			}
 			graphics.centeredText(font, label, x + width / 2,
-					y + (KEY_HEIGHT - font.lineHeight) / 2 + 1, pressed ? 0xFF0A0F15 : ON);
+					y + (KEY_HEIGHT - font.lineHeight) / 2 + 1, pressed ? 0xFF182330 : 0xFFEAF0F7);
 		}
 	}
 }
