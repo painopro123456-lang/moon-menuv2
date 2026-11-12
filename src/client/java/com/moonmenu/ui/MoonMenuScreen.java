@@ -13,7 +13,9 @@ public final class MoonMenuScreen extends Screen {
     private ModuleSpec selected;
     private int panelX, panelY, panelW, panelH;
     private int contentX, contentY, contentW;
-    private int rowW, rowH = 22;\n    private static final int PAGE_SIZE = 9;\n    private int page = 0;
+    private int rowW, rowH = 22;
+    private static final int PAGE_SIZE = 9;
+    private int page = 0;
 
     public MoonMenuScreen() {
         super(Component.literal("Moon Menu"));
