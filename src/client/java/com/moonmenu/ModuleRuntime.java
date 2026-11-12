@@ -114,6 +114,14 @@ public final class ModuleRuntime {
         if (isEnabled("Health Display")) {
             y = line(graphics, client, String.format("HEALTH  %.1f", client.player.getHealth()), y);
         }
+        if (isEnabled("Armor Status") || isEnabled("Armor Durability")) {
+            String armor = "ARMOR  "
+                    + armorPiece(client.player.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.HEAD), "H")
+                    + "  ·  " + armorPiece(client.player.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.CHEST), "C")
+                    + "  ·  " + armorPiece(client.player.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.LEGS), "L")
+                    + "  ·  " + armorPiece(client.player.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.FEET), "B");
+            y = line(graphics, client, armor, y);
+        }
         if (isEnabled("Food Status")) {
             y = line(graphics, client, "FOOD  " + client.player.getFoodData().getFoodLevel(), y);
         }
@@ -260,14 +268,6 @@ public final class ModuleRuntime {
             if (isEnabled("Arrow Count")) y = line(graphics, client, "ARROWS  " + arrows, y);
             if (isEnabled("Projectile Count")) y = line(graphics, client, "PROJECTILES  " + projectiles, y);
         }
-        if (isEnabled("Armor Status") || isEnabled("Armor Durability")) {
-            String armor = "ARMOR  "
-                    + armorPiece(client.player.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.HEAD), "H")
-                    + "  ·  " + armorPiece(client.player.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.CHEST), "C")
-                    + "  ·  " + armorPiece(client.player.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.LEGS), "L")
-                    + "  ·  " + armorPiece(client.player.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.FEET), "B");
-            y = line(graphics, client, armor, y);
-        }
         if (isEnabled("Durability Percent")) {
             var stack = client.player.getMainHandItem();
             if (!stack.isEmpty() && stack.isDamageableItem()) {
@@ -299,11 +299,6 @@ public final class ModuleRuntime {
             long seconds = sessionTicks / 20L;
             y = line(graphics, client, String.format("SESSION  %02d:%02d:%02d",
                     seconds / 3600, (seconds / 60) % 60, seconds % 60), y);
-        }
-        if (isEnabled("Food Status")) {
-            y = line(graphics, client, String.format("HUNGER  %d  SAT %.1f",
-                    client.player.getFoodData().getFoodLevel(),
-                    client.player.getFoodData().getSaturationLevel()), y);
         }
         if (isEnabled("Entity Count") || isEnabled("Hostile Count") || isEnabled("Passive Count")) {
             int nearby = 0, hostile = 0, passive = 0;
