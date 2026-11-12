@@ -48,12 +48,11 @@ public final class MoonMenuScreen extends Screen {
     }
 
     private void drawAtmosphere(GuiGraphicsExtractor g) {
-        // A dark, translucent in-game surface: the world remains visible underneath.
         GlassSurface.rounded(g, panelX + 4, panelY + 8, panelW, panelH, 20, 0x65000000);
         GlassSurface.rounded(g, panelX, panelY, panelW, panelH, 20, 0xC9141B2B);
         GlassSurface.rounded(g, panelX + 1, panelY + 1, panelW - 2, panelH - 2, 19, 0x321D2A40);
-        g.fill(panelX + 20, panelY + 1, panelX + panelW - 20, panelY + 2, 0x55DCE8F7);
-        // Quiet star points, kept subtle so the controls remain the focus.
+        // A restrained rim highlight replaces the old hard vertical divider.
+        g.fill(panelX + 22, panelY + 1, panelX + panelW - 22, panelY + 2, 0x48DCE8F7);
         int[][] stars = {{31,34},{92,75},{180,51},{225,103},{44,312},{198,365},{panelW-34,42},{panelW-62,panelH-38}};
         for (int[] star : stars) {
             int sx = panelX + star[0], sy = panelY + star[1];
@@ -66,36 +65,40 @@ public final class MoonMenuScreen extends Screen {
         g.text(font, "MOON MENU", left, panelY + 24, 0xFFF0F4FC, false);
         g.text(font, "CLIENT MOD  /  26.2", left, panelY + 42, 0xFF8F9DB4, false);
 
-        // Original crescent centerpiece, not a copied client layout.
         int cx = panelX + 116, cy = panelY + 164;
-        GlassSurface.rounded(g, cx - 48, cy - 48, 96, 96, 48, 0xDDEAF2FF);
-        GlassSurface.rounded(g, cx - 15, cy - 61, 96, 96, 48, 0xF0141B2B);
+        GlassSurface.rounded(g, cx - 52, cy - 52, 104, 104, 52, 0x1ECCD9EC);
+        GlassSurface.rounded(g, cx - 43, cy - 43, 86, 86, 43, 0xDDEAF2FF);
+        GlassSurface.rounded(g, cx - 10, cy - 56, 86, 86, 43, 0xF0141B2B);
         GlassSurface.rounded(g, cx + 27, cy - 16, 4, 4, 2, 0xC9DCE8FA);
         GlassSurface.rounded(g, cx - 61, cy + 32, 3, 3, 1, 0xAFC4D5EC);
 
         g.text(font, group.toUpperCase(), left, panelY + 244, 0xFFE6EDF8, false);
         g.text(font, countForGroup() + " MODULES", left, panelY + 263, 0xFF9AA9BF, false);
-        g.fill(left, panelY + 288, panelX + 232, panelY + 289, 0x397F91AA);
+        g.fill(left, panelY + 288, panelX + 220, panelY + 289, 0x397F91AA);
         g.text(font, "RIGHT SHIFT", left, panelY + 306, 0xFFD0D9E8, false);
         g.text(font, "TO CLOSE", left, panelY + 322, 0xFF8998AF, false);
         g.text(font, "A LITTLE MORE", left, panelY + panelH - 43, 0xFF8797B0, false);
         g.text(font, "NIGHT IN YOUR HUD", left, panelY + panelH - 27, 0xFF8797B0, false);
-        g.fill(panelX + 250, panelY + 20, panelX + 251, panelY + panelH - 20, 0x388B9BB4);
     }
 
     private void drawControls(GuiGraphicsExtractor g, int mx, int my) {
         int x = contentX;
         g.text(font, "THE NIGHT SHIFT", x, panelY + 27, 0xFFF0F4FC, false);
         g.text(font, "Choose what appears in your world.", x, panelY + 47, 0xFF9AA9BF, false);
+        g.text(font, "V2.1", panelX + panelW - 54, panelY + 28, 0xFF9EADC1, false);
 
         int tabX = x, tabY = panelY + 78;
         for (String item : GROUPS) {
             int w = font.width(item) + 24;
             boolean active = group.equals(item);
             boolean hover = inside(mx, my, tabX, tabY, w, 26);
-            if (active || hover) GlassSurface.rounded(g, tabX, tabY, w, 26, 9,
-                    active ? 0x5D9EACC6 : 0x2BDAE5F4);
-            g.text(font, item, tabX + 12, tabY + 8, active ? 0xFFF4F7FC : 0xFF9AA9BF, false);
+            if (active || hover) {
+                GlassSurface.rounded(g, tabX, tabY, w, 26, 9,
+                        active ? 0x579EACC6 : 0x2BDAE5F4);
+            }
+            g.text(font, item, tabX + 12, tabY + 8,
+                    active ? 0xFFF4F7FC : 0xFF9AA9BF, false);
+            if (active) g.fill(tabX + 12, tabY + 23, tabX + w - 12, tabY + 24, 0xB9DCE8F7);
             tabX += w + 7;
         }
 
@@ -109,21 +112,27 @@ public final class MoonMenuScreen extends Screen {
             if (ry + rowH > panelY + panelH - 20) continue;
             boolean on = enabled.contains(module.name());
             boolean hover = inside(mx, my, rx, ry, rowW, rowH);
-            GlassSurface.rounded(g, rx, ry + 3, rowW, rowH, 11, 0x39000000);
-            GlassSurface.rounded(g, rx, ry, rowW, rowH, 11,
-                    on ? 0x4D9AAFCB : hover ? 0x3B8093B0 : 0x271D2B40);
-            GlassSurface.rounded(g, rx + 1, ry + 1, rowW - 2, 1, 1, 0x4CDCE8F7);
-            GlassSurface.rounded(g, rx + 12, ry + 12, 31, 31, 10,
-                    on ? 0x74DCE8F7 : 0x3E9AAAC2);
+            GlassSurface.rounded(g, rx, ry + 3, rowW, rowH, 12, 0x30000000);
+            GlassSurface.rounded(g, rx, ry, rowW, rowH, 12,
+                    on ? 0x4D9AAFCB : hover ? 0x398093B0 : 0x241D2B40);
+            if (hover || on) {
+                GlassSurface.rounded(g, rx + 1, ry + 1, rowW - 2, 1, 1,
+                        on ? 0x70DCE8F7 : 0x35DCE8F7);
+            }
+            GlassSurface.rounded(g, rx + 12, ry + 12, 32, 32, 11,
+                    on ? 0x78DCE8F7 : 0x459AAAC2);
             String glyph = module.glyph();
-            g.text(font, glyph, rx + 12 + (31 - font.width(glyph)) / 2, ry + 23, 0xFFE5EDF9, false);
-            g.text(font, fit(module.name(), rowW - 91), rx + 53, ry + 15, 0xFFEAF0FA, false);
+            g.text(font, glyph, rx + 12 + (32 - font.width(glyph)) / 2,
+                    ry + 23, 0xFFE5EDF9, false);
+            g.text(font, fit(module.name(), rowW - 91), rx + 53, ry + 15,
+                    0xFFEAF0FA, false);
             g.text(font, on ? "ACTIVE" : "INACTIVE", rx + 53, ry + 33,
-                    on ? 0xFFC8D8EE : 0xFF8998AF, false);
+                    on ? 0xFFD5E3F4 : 0xFF8998AF, false);
+
             int tx = rx + rowW - 37;
-            GlassSurface.rounded(g, tx, ry + 20, 25, 13, 7, on ? 0xB7C9D9F0 : 0x53677891);
+            GlassSurface.rounded(g, tx, ry + 21, 25, 12, 7,
+                    on ? 0xB7C9D9F0 : 0x53677891);
             GlassSurface.rounded(g, on ? tx + 14 : tx + 2, ry + 22, 9, 9, 5, 0xFFF3F6FC);
-            // Small settings marker; clicking the trailing corner opens module details.
             g.text(font, "···", rx + rowW - 23, ry + 3, 0xFF9EADC1, false);
         }
     }
@@ -134,6 +143,7 @@ public final class MoonMenuScreen extends Screen {
         int y = panelY + panelH - h - 18;
         GlassSurface.rounded(g, x + 3, y + 5, w, h, 14, 0x90000000);
         GlassSurface.rounded(g, x, y, w, h, 14, 0xF0212B3E);
+        g.fill(x + 16, y + 1, x + w - 16, y + 2, 0x55DCE8F7);
         g.text(font, "MODULE DETAILS", x + 15, y + 15, 0xFF9EADC1, false);
         g.text(font, selected.name(), x + 15, y + 36, 0xFFF0F4FC, false);
         g.text(font, fit(selected.description(), w - 30), x + 15, y + 56, 0xFFB2BED0, false);
