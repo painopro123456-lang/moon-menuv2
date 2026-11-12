@@ -353,7 +353,7 @@ public final class ModuleRuntime {
             graphics.fill(x, 0, x + cardWidth, 1, 0xFF65758D);
 
             if (!stack.isEmpty()) {
-                graphics.renderItem(stack, x + 3, 3);
+                graphics.item(stack, x + 3, 3);
             } else {
                 graphics.fill(x + 4, 4, x + 19, 19, 0x664B5A70);
                 graphics.text(client.font, labels[i].substring(0, 1), x + 8, 7, 0xFF9AA9BF, true);
