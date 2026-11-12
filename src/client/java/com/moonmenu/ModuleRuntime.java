@@ -160,7 +160,7 @@ public final class ModuleRuntime {
                     + client.level.getMaxLocalRawBrightness(client.player.blockPosition()), y);
         }
         if (isEnabled("Day Counter")) {
-            y = line(graphics, client, "DAY  " + (client.level.getLevelData().getDayTime() / 24000L + 1L), y);
+            y = line(graphics, client, "DAY  " + (client.level.getGameTime() / 24000L + 1L), y);
         }
         if (client.player.getVehicle() instanceof net.minecraft.world.entity.LivingEntity mount) {
             if (isEnabled("Mount Health")) {
@@ -192,7 +192,7 @@ public final class ModuleRuntime {
             }
         }
         if (isEnabled("World Time")) {
-            long dayTime = client.level.getLevelData().getDayTime() % 24000L;
+            long dayTime = client.level.getGameTime() % 24000L;
             long hours = (dayTime / 1000L + 6L) % 24L;
             long minutes = (dayTime % 1000L) * 60L / 1000L;
             y = line(graphics, client, String.format("WORLD TIME  %02d:%02d", hours, minutes), y);
