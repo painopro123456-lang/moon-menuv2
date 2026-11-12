@@ -1,6 +1,7 @@
 package com.moonmenu.ui;
 
 import com.moonmenu.ModuleRuntime;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
@@ -85,11 +86,16 @@ public final class MoonMenuScreen extends Screen {
             y += 36;
         }
 
-        g.text(font, ModuleSpec.ALL.size() + " TOTAL MODULES", left, panelY + 236,
+        int editorY = panelY + 222;
+        boolean editorHover = inside(Minecraft.getInstance().mouseHandler.xpos() * width / Math.max(1, Minecraft.getInstance().getWindow().getScreenWidth()), Minecraft.getInstance().mouseHandler.ypos() * height / Math.max(1, Minecraft.getInstance().getWindow().getScreenHeight()), left - 5, editorY - 5, 137, 27);
+        GlassSurface.rounded(g, left - 5, editorY - 5, 137, 27, 7,
+                editorHover ? MenuTheme.accentWithAlpha(0x70) : MenuTheme.tint(0x328093B0, 0.22f));
+        g.text(font, "HUD EDITOR  ↗", left + 7, editorY + 3, MenuTheme.accent(), false);
+        g.text(font, ModuleSpec.ALL.size() + " TOTAL MODULES", left, panelY + 260,
                 0xFF9AA9BF, false);
-        g.text(font, group + " • " + countForGroup(), left, panelY + 250,
+        g.text(font, group + " • " + countForGroup(), left, panelY + 274,
                 0xFF71839D, false);
-        g.fill(left, panelY + 256, sidebarRight, panelY + 257, 0x397F91AA);
+        g.fill(left, panelY + 280, sidebarRight, panelY + 281, 0x397F91AA);
         g.text(font, "MENU COLOR", left, panelY + panelH - 67, 0xFFDCE5F2, false);
         g.text(font, "CHANGE ACCENT", left, panelY + panelH - 51, 0xFF8797B0, false);
     }
@@ -202,6 +208,12 @@ public final class MoonMenuScreen extends Screen {
             updateAccentFromPointer(mx, pickerX);
             return true;
         }
+        int editorY = panelY + 222;
+        if (inside(mx, my, panelX + 17, editorY - 5, 137, 27)) {
+            Minecraft.getInstance().setScreenAndShow(new HudEditorScreen());
+            return true;
+        }
+
         int navY = panelY + 76;
         for (String item : GROUPS) {
             if (inside(mx, my, panelX + 17, navY - 5, 137, 30)) {
