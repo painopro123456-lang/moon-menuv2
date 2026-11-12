@@ -63,7 +63,7 @@ public final class MoonMenuScreen extends Screen {
         GlassSurface.rounded(g, x + 8, y + 8, 18, 18, 6, 0xB9FFFFFF);
         g.text(font, "M", x + 13, y + 12, 0xFF34475C, false);
         g.text(font, "MOON", x + 43, y + 5, 0xFF172638, false);
-        g.text(font, "MENU  /  02", x + 43, y + 20, 0xFF637386, false);
+        g.text(font, "MENU  V2.1", x + 43, y + 20, 0xFF637386, false);
 
         g.fill(panelX + railW, panelY + 18, panelX + railW + 1, panelY + panelH - 18, 0x30FFFFFF);
         g.text(font, "LIBRARY", x + 2, panelY + 82, 0xFF7C8997, false);
