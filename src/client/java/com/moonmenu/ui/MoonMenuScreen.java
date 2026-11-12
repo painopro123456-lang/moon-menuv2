@@ -1,6 +1,5 @@
 package com.moonmenu.ui;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
@@ -15,10 +14,8 @@ public final class MoonMenuScreen extends Screen {
     private String group = "HUD";
     private ModuleSpec selected;
     private int panelX, panelY, panelW, panelH;
-    private int railW = 142;
-    private int cardW, cardH = 112;
-    private int gridX, gridY, gridW;
-    private int scroll;
+    private int contentX, contentY, contentW;
+    private int rowW, rowH = 58;
 
     public MoonMenuScreen() {
         super(Component.literal("Moon Menu"));
@@ -26,150 +23,147 @@ public final class MoonMenuScreen extends Screen {
 
     @Override
     protected void init() {
-        panelW = Math.min(820, width - 36);
-        panelH = Math.min(510, height - 36);
+        layout();
+    }
+
+    private void layout() {
+        panelW = Math.min(790, width - 28);
+        panelH = Math.min(440, height - 28);
         panelX = (width - panelW) / 2;
         panelY = (height - panelH) / 2;
-        gridX = panelX + railW + 24;
-        gridY = panelY + 132;
-        gridW = panelW - railW - 48;
-        cardW = (gridW - 3 * 12) / 4;
+        contentX = panelX + 258;
+        contentY = panelY + 146;
+        contentW = panelW - 282;
+        rowW = (contentW - 12) / 2;
     }
 
     @Override
     public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float delta) {
-        panelW = Math.min(820, width - 36);
-        panelH = Math.min(510, height - 36);
-        panelX = (width - panelW) / 2;
-        panelY = (height - panelH) / 2;
-        gridX = panelX + railW + 24;
-        gridY = panelY + 132;
-        gridW = panelW - railW - 48;
-        cardW = (gridW - 3 * 12) / 4;
-
-        GlassSurface.panel(g, panelX, panelY, panelW, panelH, 18);
-        drawRail(g, mouseX, mouseY);
-        drawHeader(g);
-        drawModules(g, mouseX, mouseY);
-        drawFooter(g);
-        if (selected != null) drawDetails(g, mouseX, mouseY);
+        layout();
+        drawAtmosphere(g);
+        drawMoonColumn(g);
+        drawControls(g, mouseX, mouseY);
+        if (selected != null) drawSettings(g, mouseX, mouseY);
         super.extractRenderState(g, mouseX, mouseY, delta);
     }
 
-    private void drawRail(GuiGraphicsExtractor g, int mx, int my) {
-        int x = panelX + 18;
-        int y = panelY + 20;
-        GlassSurface.rounded(g, x, y, 34, 34, 11, 0x58FFFFFF);
-        GlassSurface.rounded(g, x + 8, y + 8, 18, 18, 6, 0xB9FFFFFF);
-        g.text(font, "M", x + 13, y + 12, 0xFF34475C, false);
-        g.text(font, "MOON", x + 43, y + 5, 0xFF172638, false);
-        g.text(font, "MENU  V2.1", x + 43, y + 20, 0xFF637386, false);
+    private void drawAtmosphere(GuiGraphicsExtractor g) {
+        // A dark, translucent in-game surface: the world remains visible underneath.
+        GlassSurface.rounded(g, panelX + 4, panelY + 8, panelW, panelH, 20, 0x65000000);
+        GlassSurface.rounded(g, panelX, panelY, panelW, panelH, 20, 0xC9141B2B);
+        GlassSurface.rounded(g, panelX + 1, panelY + 1, panelW - 2, panelH - 2, 19, 0x321D2A40);
+        g.fill(panelX + 20, panelY + 1, panelX + panelW - 20, panelY + 2, 0x55DCE8F7);
+        // Quiet star points, kept subtle so the controls remain the focus.
+        int[][] stars = {{31,34},{92,75},{180,51},{225,103},{44,312},{198,365},{panelW-34,42},{panelW-62,panelH-38}};
+        for (int[] star : stars) {
+            int sx = panelX + star[0], sy = panelY + star[1];
+            GlassSurface.rounded(g, sx, sy, 2, 2, 1, 0x8CC8D8EF);
+        }
+    }
 
-        g.fill(panelX + railW, panelY + 18, panelX + railW + 1, panelY + panelH - 18, 0x30FFFFFF);
-        g.text(font, "LIBRARY", x + 2, panelY + 82, 0xFF7C8997, false);
-        int navY = panelY + 105;
+    private void drawMoonColumn(GuiGraphicsExtractor g) {
+        int left = panelX + 26;
+        g.text(font, "MOON MENU", left, panelY + 24, 0xFFF0F4FC, false);
+        g.text(font, "CLIENT MOD  /  26.2", left, panelY + 42, 0xFF8F9DB4, false);
+
+        // Original crescent centerpiece, not a copied client layout.
+        int cx = panelX + 116, cy = panelY + 164;
+        GlassSurface.rounded(g, cx - 48, cy - 48, 96, 96, 48, 0xDDEAF2FF);
+        GlassSurface.rounded(g, cx - 15, cy - 61, 96, 96, 48, 0xF0141B2B);
+        GlassSurface.rounded(g, cx + 27, cy - 16, 4, 4, 2, 0xC9DCE8FA);
+        GlassSurface.rounded(g, cx - 61, cy + 32, 3, 3, 1, 0xAFC4D5EC);
+
+        g.text(font, group.toUpperCase(), left, panelY + 244, 0xFFE6EDF8, false);
+        g.text(font, countForGroup() + " MODULES", left, panelY + 263, 0xFF9AA9BF, false);
+        g.fill(left, panelY + 288, panelX + 232, panelY + 289, 0x397F91AA);
+        g.text(font, "RIGHT SHIFT", left, panelY + 306, 0xFFD0D9E8, false);
+        g.text(font, "TO CLOSE", left, panelY + 322, 0xFF8998AF, false);
+        g.text(font, "A LITTLE MORE", left, panelY + panelH - 43, 0xFF8797B0, false);
+        g.text(font, "NIGHT IN YOUR HUD", left, panelY + panelH - 27, 0xFF8797B0, false);
+        g.fill(panelX + 250, panelY + 20, panelX + 251, panelY + panelH - 20, 0x388B9BB4);
+    }
+
+    private void drawControls(GuiGraphicsExtractor g, int mx, int my) {
+        int x = contentX;
+        g.text(font, "THE NIGHT SHIFT", x, panelY + 27, 0xFFF0F4FC, false);
+        g.text(font, "Choose what appears in your world.", x, panelY + 47, 0xFF9AA9BF, false);
+
+        int tabX = x, tabY = panelY + 78;
         for (String item : GROUPS) {
+            int w = font.width(item) + 24;
             boolean active = group.equals(item);
-            boolean hover = inside(mx, my, x - 7, navY - 6, railW - 28, 32);
-            if (active || hover) GlassSurface.rounded(g, x - 7, navY - 6, railW - 28, 32, 9,
-                    active ? 0x65FFFFFF : 0x28FFFFFF);
-            g.text(font, item, x + 5, navY + 5, active ? 0xFF26384B : 0xFF647386, false);
-            navY += 39;
+            boolean hover = inside(mx, my, tabX, tabY, w, 26);
+            if (active || hover) GlassSurface.rounded(g, tabX, tabY, w, 26, 9,
+                    active ? 0x5D9EACC6 : 0x2BDAE5F4);
+            g.text(font, item, tabX + 12, tabY + 8, active ? 0xFFF4F7FC : 0xFF9AA9BF, false);
+            tabX += w + 7;
         }
 
-        int bottom = panelY + panelH - 54;
-        g.fill(x, bottom - 10, panelX + railW - 18, bottom - 9, 0x32FFFFFF);
-        g.text(font, "MOON MENU", x + 2, bottom + 2, 0xFF667689, false);
-        g.text(font, "FABRIC 26.2", x + 2, bottom + 17, 0xFF8B98A5, false);
-    }
-
-    private void drawHeader(GuiGraphicsExtractor g) {
-        int x = gridX;
-        g.text(font, "YOUR MODULES", x, panelY + 42, 0xFF1D2B3A, false);
-        g.text(font, "A quieter interface. Your game stays in view.", x, panelY + 62, 0xFF667789, false);
-        String count = countForGroup() + " ITEMS";
-        g.text(font, count, panelX + panelW - 112 - font.width(count), panelY + 46, 0xFF758496, false);
-        GlassSurface.rounded(g, panelX + panelW - 92, panelY + 75, 68, 24, 8, 0x38FFFFFF);
-        g.text(font, "SEARCH", panelX + panelW - 75, panelY + 83, 0xFF718093, false);
-    }
-
-    private void drawModules(GuiGraphicsExtractor g, int mx, int my) {
         int index = 0;
         for (ModuleSpec module : ModuleSpec.ALL) {
             if (!module.group().equals(group)) continue;
-            int col = index % 4;
-            int row = index / 4;
-            int x = gridX + col * (cardW + 12);
-            int y = gridY + row * (cardH + 12) - scroll;
+            int col = index % 2, row = index / 2;
+            int rx = contentX + col * (rowW + 12);
+            int ry = contentY + row * (rowH + 9);
             index++;
-            if (y + cardH < gridY || y > panelY + panelH - 50) continue;
+            if (ry + rowH > panelY + panelH - 20) continue;
             boolean on = enabled.contains(module.name());
-            boolean hover = inside(mx, my, x, y, cardW, cardH);
-            GlassSurface.tile(g, x, y, cardW, cardH, on, hover);
-
-            int iconX = x + (cardW - 38) / 2;
-            GlassSurface.rounded(g, iconX, y + 13, 38, 38, 12,
-                    on ? 0x80FFFFFF : 0x4AFFFFFF);
+            boolean hover = inside(mx, my, rx, ry, rowW, rowH);
+            GlassSurface.rounded(g, rx, ry + 3, rowW, rowH, 11, 0x39000000);
+            GlassSurface.rounded(g, rx, ry, rowW, rowH, 11,
+                    on ? 0x4D9AAFCB : hover ? 0x3B8093B0 : 0x271D2B40);
+            GlassSurface.rounded(g, rx + 1, ry + 1, rowW - 2, 1, 1, 0x4CDCE8F7);
+            GlassSurface.rounded(g, rx + 12, ry + 12, 31, 31, 10,
+                    on ? 0x74DCE8F7 : 0x3E9AAAC2);
             String glyph = module.glyph();
-            g.text(font, glyph, iconX + (38 - font.width(glyph)) / 2, y + 25, 0xFF40546A, false);
-
-            String name = fit(module.name(), cardW - 14);
-            g.text(font, name, x + (cardW - font.width(name)) / 2, y + 60, 0xFF243448, false);
-            String state = on ? "ENABLED" : "DISABLED";
-            g.text(font, state, x + (cardW - font.width(state)) / 2, y + 77,
-                    on ? 0xFF506C89 : 0xFF8491A0, false);
-
-            int gearX = x + cardW - 22;
-            GlassSurface.rounded(g, gearX, y + 8, 16, 16, 5, 0x36FFFFFF);
-            g.text(font, "·", gearX + 6, y + 10, 0xFF647589, false);
+            g.text(font, glyph, rx + 12 + (31 - font.width(glyph)) / 2, ry + 23, 0xFFE5EDF9, false);
+            g.text(font, fit(module.name(), rowW - 91), rx + 53, ry + 15, 0xFFEAF0FA, false);
+            g.text(font, on ? "ACTIVE" : "INACTIVE", rx + 53, ry + 33,
+                    on ? 0xFFC8D8EE : 0xFF8998AF, false);
+            int tx = rx + rowW - 37;
+            GlassSurface.rounded(g, tx, ry + 20, 25, 13, 7, on ? 0xB7C9D9F0 : 0x53677891);
+            GlassSurface.rounded(g, on ? tx + 14 : tx + 2, ry + 22, 9, 9, 5, 0xFFF3F6FC);
+            // Small settings marker; clicking the trailing corner opens module details.
+            g.text(font, "···", rx + rowW - 23, ry + 3, 0xFF9EADC1, false);
         }
     }
 
-    private void drawDetails(GuiGraphicsExtractor g, int mx, int my) {
-        int w = 260, h = 154;
-        int x = panelX + panelW - w - 22;
-        int y = panelY + panelH - h - 24;
-        GlassSurface.panel(g, x, y, w, h, 14);
-        g.text(font, "MODULE SETTINGS", x + 16, y + 17, 0xFF718093, false);
-        g.text(font, selected.name(), x + 16, y + 38, 0xFF1E2D3E, false);
-        g.text(font, fit(selected.description(), w - 32), x + 16, y + 58, 0xFF647588, false);
-        GlassSurface.rounded(g, x + 16, y + 91, w - 32, 32, 9, 0x55FFFFFF);
-        g.text(font, "Toggle this module from its card", x + 27, y + 102, 0xFF4D6074, false);
-        g.text(font, "×", x + w - 23, y + 12, 0xFF526579, false);
-    }
-
-    private void drawFooter(GuiGraphicsExtractor g) {
-        int y = panelY + panelH - 31;
-        g.fill(gridX, y - 7, panelX + panelW - 20, y - 6, 0x30FFFFFF);
-        g.text(font, "RIGHT SHIFT  ·  CLOSE", gridX, y + 2, 0xFF8491A0, false);
-        g.text(font, "MOON MENU  /  NEW INTERFACE", panelX + panelW - 202, y + 2, 0xFF8491A0, false);
+    private void drawSettings(GuiGraphicsExtractor g, int mx, int my) {
+        int w = 248, h = 126;
+        int x = panelX + panelW - w - 18;
+        int y = panelY + panelH - h - 18;
+        GlassSurface.rounded(g, x + 3, y + 5, w, h, 14, 0x90000000);
+        GlassSurface.rounded(g, x, y, w, h, 14, 0xF0212B3E);
+        g.text(font, "MODULE DETAILS", x + 15, y + 15, 0xFF9EADC1, false);
+        g.text(font, selected.name(), x + 15, y + 36, 0xFFF0F4FC, false);
+        g.text(font, fit(selected.description(), w - 30), x + 15, y + 56, 0xFFB2BED0, false);
+        g.text(font, "CLICK THE MODULE TO TOGGLE", x + 15, y + 91, 0xFF8998AF, false);
+        g.text(font, "×", x + w - 19, y + 11, 0xFFE4EBF6, false);
     }
 
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubled) {
-        double mx = event.x();
-        double my = event.y();
-        int x = panelX + 18;
-        int navY = panelY + 105;
+        double mx = event.x(), my = event.y();
+        int tabX = contentX, tabY = panelY + 78;
         for (String item : GROUPS) {
-            if (inside(mx, my, x - 7, navY - 6, railW - 28, 32)) {
+            int w = font.width(item) + 24;
+            if (inside(mx, my, tabX, tabY, w, 26)) {
                 group = item;
-                scroll = 0;
                 selected = null;
                 return true;
             }
-            navY += 39;
+            tabX += w + 7;
         }
 
         int index = 0;
         for (ModuleSpec module : ModuleSpec.ALL) {
             if (!module.group().equals(group)) continue;
-            int col = index % 4, row = index / 4;
-            int cx = gridX + col * (cardW + 12);
-            int cy = gridY + row * (cardH + 12) - scroll;
+            int col = index % 2, row = index / 2;
+            int rx = contentX + col * (rowW + 12);
+            int ry = contentY + row * (rowH + 9);
             index++;
-            if (!inside(mx, my, cx, cy, cardW, cardH)) continue;
-            if (mx >= cx + cardW - 26 && my <= cy + 30) {
+            if (!inside(mx, my, rx, ry, rowW, rowH)) continue;
+            if (mx >= rx + rowW - 30 || my <= ry + 11) {
                 selected = module;
             } else if (!enabled.add(module.name())) {
                 enabled.remove(module.name());
@@ -178,10 +172,9 @@ public final class MoonMenuScreen extends Screen {
         }
 
         if (selected != null) {
-            int w = 260, h = 154;
-            int dx = panelX + panelW - w - 22;
-            int dy = panelY + panelH - h - 24;
-            if (inside(mx, my, dx + w - 30, dy, 30, 30)) {
+            int w = 248, h = 126;
+            int x = panelX + panelW - w - 18, y = panelY + panelH - h - 18;
+            if (inside(mx, my, x + w - 28, y, 28, 28)) {
                 selected = null;
                 return true;
             }
@@ -198,9 +191,7 @@ public final class MoonMenuScreen extends Screen {
     private String fit(String value, int maxWidth) {
         if (font.width(value) <= maxWidth) return value;
         String result = value;
-        while (!result.isEmpty() && font.width(result + "…") > maxWidth) {
-            result = result.substring(0, result.length() - 1);
-        }
+        while (!result.isEmpty() && font.width(result + "…") > maxWidth) result = result.substring(0, result.length() - 1);
         return result + "…";
     }
 
