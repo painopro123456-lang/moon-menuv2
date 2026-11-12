@@ -128,6 +128,69 @@ public final class ModuleRuntime {
                 y = line(graphics, client, "DURABILITY  " + remaining + " / " + stack.getMaxDamage(), y);
             }
         }
+        if (isEnabled("Armor Points")) {
+            y = line(graphics, client, "ARMOR  " + client.player.getArmorValue(), y);
+        }
+        if (isEnabled("Absorption")) {
+            y = line(graphics, client, String.format("ABSORPTION  %.1f", client.player.getAbsorptionAmount()), y);
+        }
+        if (isEnabled("Air")) {
+            y = line(graphics, client, "AIR  " + client.player.getAirSupply()
+                    + " / " + client.player.getMaxAirSupply(), y);
+        }
+        if (isEnabled("Coordinates XYZ")) {
+            y = line(graphics, client, String.format("XYZ  %d  %d  %d",
+                    client.player.getBlockX(), client.player.getBlockY(), client.player.getBlockZ()), y);
+        }
+        if (isEnabled("Chunk Border Info")) {
+            var pos = client.player.blockPosition();
+            y = line(graphics, client, "CHUNK  " + (pos.getX() >> 4) + "  "
+                    + (pos.getZ() >> 4) + "  LOCAL " + (pos.getX() & 15) + " " + (pos.getZ() & 15), y);
+        }
+        if (isEnabled("Direction") || isEnabled("Compass")) {
+            y = line(graphics, client, "FACING  " + client.player.getDirection().toString(), y);
+        }
+        if (isEnabled("Velocity")) {
+            var velocity = client.player.getDeltaMovement();
+            y = line(graphics, client, String.format("VELOCITY  %.2f  %.2f  %.2f",
+                    velocity.x, velocity.y, velocity.z), y);
+        }
+        if (isEnabled("Light Level")) {
+            y = line(graphics, client, "LIGHT  "
+                    + client.level.getMaxLocalRawBrightness(client.player.blockPosition()), y);
+        }
+        if (isEnabled("Day Counter")) {
+            y = line(graphics, client, "DAY  " + (client.level.getLevelData().getDayTime() / 24000L + 1L), y);
+        }
+        if (client.player.getVehicle() instanceof net.minecraft.world.entity.LivingEntity mount) {
+            if (isEnabled("Mount Health")) {
+                y = line(graphics, client, String.format("MOUNT HP  %.1f / %.1f",
+                        mount.getHealth(), mount.getMaxHealth()), y);
+            }
+            if (isEnabled("Mount Speed")) {
+                var motion = mount.getDeltaMovement();
+                y = line(graphics, client, String.format("MOUNT SPEED  %.2f",
+                        Math.sqrt(motion.x * motion.x + motion.z * motion.z) * 20.0), y);
+            }
+        }
+        if (client.hitResult instanceof net.minecraft.world.phys.EntityHitResult targetHit) {
+            var target = targetHit.getEntity();
+            if (isEnabled("Target Distance")) {
+                y = line(graphics, client, String.format("TARGET DIST  %.1f", client.player.distanceTo(target)), y);
+            }
+            if (isEnabled("Target Name")) {
+                y = line(graphics, client, "TARGET  " + target.getName().getString(), y);
+            }
+            if (target instanceof net.minecraft.world.entity.LivingEntity livingTarget) {
+                if (isEnabled("Target Health")) {
+                    y = line(graphics, client, String.format("TARGET HP  %.1f / %.1f",
+                            livingTarget.getHealth(), livingTarget.getMaxHealth()), y);
+                }
+                if (isEnabled("Target Armor")) {
+                    y = line(graphics, client, "TARGET ARMOR  " + livingTarget.getArmorValue(), y);
+                }
+            }
+        }
         if (isEnabled("World Time")) {
             long dayTime = client.level.getLevelData().getDayTime() % 24000L;
             long hours = (dayTime / 1000L + 6L) % 24L;
