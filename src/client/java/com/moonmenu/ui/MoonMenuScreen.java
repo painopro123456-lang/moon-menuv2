@@ -1,16 +1,14 @@
 package com.moonmenu.ui;
 
+import com.moonmenu.ModuleRuntime;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 
-import java.util.HashSet;
-import java.util.Set;
 
 public final class MoonMenuScreen extends Screen {
     private static final String[] GROUPS = {"HUD", "Gameplay", "Visual", "Chat"};
-    private final Set<String> enabled = new HashSet<>();
     private String group = "HUD";
     private ModuleSpec selected;
     private int panelX, panelY, panelW, panelH;
@@ -128,7 +126,7 @@ public final class MoonMenuScreen extends Screen {
             int ry = contentY + visibleIndex * (rowH + 5);
             index++;
             if (ry + rowH > panelY + panelH - 34) continue;
-            boolean on = enabled.contains(module.name());
+            boolean on = ModuleRuntime.isEnabled(module.name());
             boolean hover = inside(mx, my, rx, ry, rowW, rowH);
             if (hover || on) {
                 GlassSurface.rounded(g, rx, ry, rowW, rowH, 7,
@@ -212,8 +210,8 @@ public final class MoonMenuScreen extends Screen {
             if (!inside(mx, my, rx, ry, rowW, rowH)) continue;
             if (mx >= rx + rowW - 112 && mx < rx + rowW - 82) {
                 selected = module;
-            } else if (!enabled.add(module.name())) {
-                enabled.remove(module.name());
+            } else {
+                ModuleRuntime.toggle(module.name());
             }
             return true;
         }
