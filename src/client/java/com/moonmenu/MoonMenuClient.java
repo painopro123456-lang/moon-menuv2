@@ -22,7 +22,10 @@ public final class MoonMenuClient implements ClientModInitializer {
                 GLFW.GLFW_KEY_RIGHT_SHIFT,
                 category));
 
+        ModuleRuntime.initialize();
+
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            ModuleRuntime.tick(client);
             while (openMenu.consumeClick()) {
                 if (client.gui.screen() == null) {
                     client.setScreenAndShow(new MoonMenuScreen());
