@@ -354,7 +354,7 @@ public final class VloxScreen extends Screen {
 		graphics.fill(x + 7, this.panelY + 24, x + 27, this.panelY + 25, 0xBFFFFFFF);
 		Ui.textScaled(graphics, this.font, "M", x + 11, this.panelY + 27, Ui.TEXT, 1.25F);
 		Ui.textScaled(graphics, this.font, "MOON", x + 43, this.panelY + 20, Ui.TEXT, 1.18F);
-		Ui.text(graphics, this.font, "CLIENT  /  V2", x + 44, this.panelY + 39, Ui.MUTED);
+		Ui.text(graphics, this.font, "CLIENT  /  V2.1", x + 44, this.panelY + 39, Ui.MUTED);
 
 		graphics.fill(this.panelX + RAIL_WIDTH - 1, this.panelY + 16, this.panelX + RAIL_WIDTH,
 				this.panelY + this.panelHeight - 16, 0x42FFFFFF);
