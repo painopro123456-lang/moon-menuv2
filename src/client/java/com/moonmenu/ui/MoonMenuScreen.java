@@ -14,8 +14,8 @@ public final class MoonMenuScreen extends Screen {
     private int panelX, panelY, panelW, panelH;
     private int contentX, contentY, contentW;
     private int rowW, rowH = 32;
-    private static final int PAGE_SIZE = 9;
-    private int page = 0;
+    private int scrollOffset = 0;
+    private int visibleRows;
 
     public MoonMenuScreen() {
         super(Component.literal("Moon Menu"));
@@ -35,6 +35,8 @@ public final class MoonMenuScreen extends Screen {
         contentY = panelY + 112;
         contentW = panelW - 198;
         rowW = contentW;
+        visibleRows = Math.max(1, (panelY + panelH - 48 - contentY) / (rowH + 5));
+        scrollOffset = Math.max(0, Math.min(scrollOffset, Math.max(0, countForGroup() - visibleRows)));
     }
 
     @Override
@@ -135,17 +137,14 @@ public final class MoonMenuScreen extends Screen {
         
 
         int index = 0;
+        int shown = 0;
         for (ModuleSpec module : ModuleSpec.ALL) {
             if (!module.group().equals(group)) continue;
-            if (index < page * PAGE_SIZE || index >= (page + 1) * PAGE_SIZE) {
-                index++;
-                continue;
-            }
-            int visibleIndex = index - page * PAGE_SIZE;
+            if (index++ < scrollOffset) continue;
+            if (shown >= visibleRows) break;
             int rx = contentX;
-            int ry = contentY + visibleIndex * (rowH + 5);
-            index++;
-            if (ry + rowH > panelY + panelH - 42) continue;
+            int ry = contentY + shown * (rowH + 5);
+            shown++;
             boolean on = ModuleRuntime.isEnabled(module.name());
             boolean hover = inside(mx, my, rx, ry, rowW, rowH);
             if (hover || on) {
@@ -154,26 +153,27 @@ public final class MoonMenuScreen extends Screen {
             } else {
                 GlassSurface.rounded(g, rx + 2, ry + 2, rowW - 4, rowH - 4, 7, 0x1E9AAAC2);
             }
-            g.text(font, fit(module.name(), rowW - 160), rx + 13, ry + 5,
+            g.text(font, fit(module.name(), rowW - 160), rx + 13, ry + 3,
                     0xFFEAF0FA, false);
-            g.text(font, fit(module.description(), rowW - 160), rx + 13, ry + 18,
+            g.text(font, fit(module.description(), rowW - 160), rx + 13, ry + 16,
                     0xFF9AA9BF, false);
-            g.text(font, on ? "ON" : "OFF", rx + rowW - 79, ry + 10,
+            g.text(font, on ? "ON" : "OFF", rx + rowW - 79, ry + 9,
                     on ? 0xFFDCE8F7 : 0xFF8998AF, false);
             int tx = rx + rowW - 38;
-            GlassSurface.rounded(g, tx, ry + 10, 25, 12, 7,
+            GlassSurface.rounded(g, tx, ry + 8, 25, 12, 7,
                     on ? MenuTheme.accentWithAlpha(0xD0) : 0x53677891);
-            GlassSurface.rounded(g, on ? tx + 14 : tx + 2, ry + 11, 9, 9, 5, 0xFFF3F6FC);
-            g.text(font, "···", rx + rowW - 104, ry + 8, 0xFF9EADC1, false);
+            GlassSurface.rounded(g, on ? tx + 14 : tx + 2, ry + 9, 9, 9, 5, 0xFFF3F6FC);
+            g.text(font, "···", rx + rowW - 104, ry + 6, 0xFF9EADC1, false);
         }
-        int pages = Math.max(1, (countForGroup() + PAGE_SIZE - 1) / PAGE_SIZE);
-        int footerY = panelY + panelH - 25;
-        g.text(font, "PAGE " + (page + 1) + " / " + pages, contentX, footerY,
+        int total = countForGroup();
+        g.text(font, "SCROLL • " + total + " MODULES", contentX, panelY + panelH - 25,
                 0xFF9AA9BF, false);
-        g.text(font, "‹", contentX + contentW - 42, footerY - 3,
-                page > 0 ? 0xFFEAF0FA : 0xFF59677D, false);
-        g.text(font, "›", contentX + contentW - 17, footerY - 3,
-                page + 1 < pages ? 0xFFEAF0FA : 0xFF59677D, false);
+        if (scrollOffset > 0) {
+            g.text(font, "↑", contentX + contentW - 42, panelY + 90, 0xFFEAF0FA, false);
+        }
+        if (scrollOffset + visibleRows < total) {
+            g.text(font, "↓", contentX + contentW - 42, panelY + panelH - 54, 0xFFEAF0FA, false);
+        }
     }
 
     private void drawSettings(GuiGraphicsExtractor g, int mx, int my) {
@@ -204,37 +204,21 @@ public final class MoonMenuScreen extends Screen {
         for (String item : GROUPS) {
             if (inside(mx, my, panelX + 17, navY - 5, 137, 30)) {
                 group = item;
-                page = 0;
+                scrollOffset = 0;
                 selected = null;
                 return true;
             }
             navY += 36;
         }
 
-        int pages = Math.max(1, (countForGroup() + PAGE_SIZE - 1) / PAGE_SIZE);
-        int footerY = panelY + panelH - 30;
-        if (inside(mx, my, contentX + contentW - 52, footerY, 24, 28) && page > 0) {
-            page--;
-            selected = null;
-            return true;
-        }
-        if (inside(mx, my, contentX + contentW - 27, footerY, 24, 28) && page + 1 < pages) {
-            page++;
-            selected = null;
-            return true;
-        }
-
         int index = 0;
         for (ModuleSpec module : ModuleSpec.ALL) {
             if (!module.group().equals(group)) continue;
-            if (index < page * PAGE_SIZE || index >= (page + 1) * PAGE_SIZE) {
-                index++;
-                continue;
-            }
-            int visibleIndex = index - page * PAGE_SIZE;
+            if (index++ < scrollOffset) continue;
+            int visibleIndex = index - 1 - scrollOffset;
+            if (visibleIndex >= visibleRows) break;
             int rx = contentX;
             int ry = contentY + visibleIndex * (rowH + 5);
-            index++;
             if (!inside(mx, my, rx, ry, rowW, rowH)) continue;
             if (mx >= rx + rowW - 112 && mx < rx + rowW - 82) {
                 selected = module;
@@ -253,6 +237,14 @@ public final class MoonMenuScreen extends Screen {
             }
         }
         return super.mouseClicked(event, doubled);
+    }
+
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+        int max = Math.max(0, countForGroup() - visibleRows);
+        if (verticalAmount < 0) scrollOffset = Math.min(max, scrollOffset + 3);
+        else if (verticalAmount > 0) scrollOffset = Math.max(0, scrollOffset - 3);
+        return true;
     }
 
     private int countForGroup() {
