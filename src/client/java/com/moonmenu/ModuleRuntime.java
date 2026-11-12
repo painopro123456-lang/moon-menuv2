@@ -14,6 +14,10 @@ public final class ModuleRuntime {
     private static boolean savedToggleSprint;
     private static boolean savedToggleSneak;
     private static boolean movementKeyForced;
+    private static long sessionTicks;
+    private static int lastHealth = -1;
+    private static int sessionDeaths;
+    private static int lastFood = -1;
 
     private ModuleRuntime() {}
 
@@ -66,6 +70,13 @@ public final class ModuleRuntime {
     }
 
     public static void tick(Minecraft client) {
+        if (client.player != null) {
+            sessionTicks++;
+            if (lastHealth >= 0 && lastHealth > 0 && client.player.getHealth() <= 0) sessionDeaths++;
+            lastHealth = Math.max(0, (int) client.player.getHealth());
+            lastFood = client.player.getFoodData().getFoodLevel();
+            if (isEnabled("Auto Respawn") && client.player.isDeadOrDying()) client.player.respawn();
+        }
         if (client.player == null) {
             movementKeyForced = false;
             return;
@@ -282,6 +293,60 @@ public final class ModuleRuntime {
             long hours = (dayTime / 1000L + 6L) % 24L;
             long minutes = (dayTime % 1000L) * 60L / 1000L;
             y = line(graphics, client, String.format("WORLD TIME  %02d:%02d", hours, minutes), y);
+        }
+        if (isEnabled("Ping")) {
+            var connection = client.getConnection();
+            var info = connection == null ? null : connection.getPlayerInfo(client.player.getUUID());
+            if (info != null) y = line(graphics, client, "PING  " + info.getLatency() + " ms", y);
+        }
+        if (isEnabled("Biome") || isEnabled("Biome Temperature")) {
+            var biome = client.level.getBiome(client.player.blockPosition());
+            String biomeName = biome.unwrapKey().map(key -> key.location().toString()).orElse("Unknown");
+            y = line(graphics, client, "BIOME  " + biomeName, y);
+        }
+        if (isEnabled("Session Time")) {
+            long seconds = sessionTicks / 20L;
+            y = line(graphics, client, String.format("SESSION  %02d:%02d:%02d",
+                    seconds / 3600, (seconds / 60) % 60, seconds % 60), y);
+        }
+        if (isEnabled("Food Status")) {
+            y = line(graphics, client, String.format("HUNGER  %d  SAT %.1f",
+                    client.player.getFoodData().getFoodLevel(),
+                    client.player.getFoodData().getSaturationLevel()), y);
+        }
+        if (isEnabled("Entity Count") || isEnabled("Hostile Count") || isEnabled("Passive Count")) {
+            int nearby = 0, hostile = 0, passive = 0;
+            for (var entity : client.level.entitiesForRendering()) {
+                if (entity == client.player || entity.distanceToSqr(client.player) > 4096) continue;
+                nearby++;
+                if (entity instanceof net.minecraft.world.entity.monster.Monster) hostile++;
+                if (entity instanceof net.minecraft.world.entity.animal.Animal) passive++;
+            }
+            if (isEnabled("Entity Count")) y = line(graphics, client, "ENTITIES  " + nearby, y);
+            if (isEnabled("Hostile Count")) y = line(graphics, client, "HOSTILES  " + hostile, y);
+            if (isEnabled("Passive Count")) y = line(graphics, client, "PASSIVE  " + passive, y);
+        }
+        if (isEnabled("Deaths")) y = line(graphics, client, "DEATHS  " + sessionDeaths, y);
+        if (isEnabled("Local Difficulty")) {
+            y = line(graphics, client, "LOCAL DIFFICULTY  "
+                    + client.level.getCurrentDifficultyAt(client.player.blockPosition()).getEffectiveDifficulty(), y);
+        }
+        if (isEnabled("Jump Distance")) {
+            var velocity = client.player.getDeltaMovement();
+            y = line(graphics, client, String.format("HORIZONTAL MOTION  %.2f",
+                    Math.sqrt(velocity.x * velocity.x + velocity.z * velocity.z)), y);
+        }
+        if (isEnabled("Armor Enchants")) {
+            for (var slot : net.minecraft.world.entity.EquipmentSlot.values()) {
+                if (!slot.isArmor()) continue;
+                var stack = client.player.getItemBySlot(slot);
+                if (!stack.isEmpty() && !stack.getEnchantments().isEmpty()) {
+                    y = line(graphics, client, slot.getName().toUpperCase() + " ENCHANTED", y);
+                }
+            }
+        }
+        if (isEnabled("Totem Count") || isEnabled("Arrow Count") || isEnabled("Projectile Count")) {
+            // Counts are rendered in the shared inventory counter block above.
         }
     }
 
