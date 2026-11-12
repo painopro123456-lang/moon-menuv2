@@ -14,7 +14,7 @@ public final class MoonMenuScreen extends Screen {
     private int panelX, panelY, panelW, panelH;
     private int contentX, contentY, contentW;
     private int rowW, rowH = 32;
-    private static final int PAGE_SIZE = 10;
+    private static final int PAGE_SIZE = 9;
     private int page = 0;
 
     public MoonMenuScreen() {
