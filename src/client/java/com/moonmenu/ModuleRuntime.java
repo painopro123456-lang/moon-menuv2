@@ -115,12 +115,7 @@ public final class ModuleRuntime {
             y = line(graphics, client, String.format("HEALTH  %.1f", client.player.getHealth()), y);
         }
         if (isEnabled("Armor Status") || isEnabled("Armor Durability")) {
-            String armor = "ARMOR  "
-                    + armorPiece(client.player.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.HEAD), "H")
-                    + "  ·  " + armorPiece(client.player.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.CHEST), "C")
-                    + "  ·  " + armorPiece(client.player.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.LEGS), "L")
-                    + "  ·  " + armorPiece(client.player.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.FEET), "B");
-            y = line(graphics, client, armor, y);
+            renderArmorStatus(graphics, client);
         }
         if (isEnabled("Food Status")) {
             y = line(graphics, client, "FOOD  " + client.player.getFoodData().getFoodLevel(), y);
@@ -331,6 +326,69 @@ public final class ModuleRuntime {
         if (isEnabled("Totem Count") || isEnabled("Arrow Count") || isEnabled("Projectile Count")) {
             // Counts are rendered in the shared inventory counter block above.
         }
+    }
+
+    private static void renderArmorStatus(net.minecraft.client.gui.GuiGraphicsExtractor graphics,
+                                          Minecraft client) {
+        HudLayout.Entry layout = HudLayout.get("ARMOR STATUS", 8);
+        graphics.pose().pushMatrix();
+        graphics.pose().translate((float) layout.x(), (float) layout.y());
+        graphics.pose().scale(layout.scale(), layout.scale());
+
+        net.minecraft.world.entity.EquipmentSlot[] slots = {
+                net.minecraft.world.entity.EquipmentSlot.HEAD,
+                net.minecraft.world.entity.EquipmentSlot.CHEST,
+                net.minecraft.world.entity.EquipmentSlot.LEGS,
+                net.minecraft.world.entity.EquipmentSlot.FEET
+        };
+        String[] labels = {"HELMET", "CHEST", "LEGS", "BOOTS"};
+        int cardWidth = 58;
+        int cardHeight = 39;
+        int gap = 4;
+
+        for (int i = 0; i < slots.length; i++) {
+            int x = i * (cardWidth + gap);
+            var stack = client.player.getItemBySlot(slots[i]);
+            graphics.fill(x, 0, x + cardWidth, cardHeight, 0xB8172030);
+            graphics.fill(x, 0, x + cardWidth, 1, 0xFF65758D);
+
+            if (!stack.isEmpty()) {
+                graphics.renderItem(stack, x + 3, 3);
+            } else {
+                graphics.fill(x + 4, 4, x + 19, 19, 0x664B5A70);
+                graphics.text(client.font, labels[i].substring(0, 1), x + 8, 7, 0xFF9AA9BF, true);
+            }
+
+            int remaining = 0;
+            int max = 0;
+            int percent = 100;
+            if (!stack.isEmpty() && stack.isDamageableItem()) {
+                max = stack.getMaxDamage();
+                remaining = Math.max(0, max - stack.getDamageValue());
+                percent = max <= 0 ? 100 : Math.round(remaining * 100.0f / max);
+            } else if (!stack.isEmpty()) {
+                remaining = 1;
+                max = 1;
+            }
+
+            int durabilityColor = percent > 60 ? 0xFF65D68A
+                    : percent > 25 ? 0xFFFFC857 : 0xFFFF626F;
+            String percentText = stack.isEmpty() ? "EMPTY" : percent + "%";
+            graphics.text(client.font, percentText, x + 22, 5,
+                    stack.isEmpty() ? 0xFF8998AF : durabilityColor, true);
+
+            graphics.fill(x + 3, 23, x + cardWidth - 3, 26, 0xFF344155);
+            int fillWidth = stack.isEmpty() ? 0
+                    : Math.round((cardWidth - 6) * (percent / 100.0f));
+            if (fillWidth > 0) {
+                graphics.fill(x + 3, 23, x + 3 + fillWidth, 26, durabilityColor);
+            }
+
+            String amount = stack.isEmpty() ? labels[i]
+                    : stack.isDamageableItem() ? remaining + "/" + max : "UNBREAKABLE";
+            graphics.text(client.font, amount, x + 3, 29, 0xFFDCE5F2, true);
+        }
+        graphics.pose().popMatrix();
     }
 
     private static String armorPiece(net.minecraft.world.item.ItemStack stack, String label) {
