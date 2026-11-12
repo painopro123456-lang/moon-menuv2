@@ -15,7 +15,7 @@ public final class MoonMenuScreen extends Screen {
     private ModuleSpec selected;
     private int panelX, panelY, panelW, panelH;
     private int contentX, contentY, contentW;
-    private int rowW, rowH = 22;
+    private int rowW, rowH = 22;\n    private static final int PAGE_SIZE = 9;\n    private int page = 0;
 
     public MoonMenuScreen() {
         super(Component.literal("Moon Menu"));
@@ -119,10 +119,15 @@ public final class MoonMenuScreen extends Screen {
         int index = 0;
         for (ModuleSpec module : ModuleSpec.ALL) {
             if (!module.group().equals(group)) continue;
+            if (index < page * PAGE_SIZE || index >= (page + 1) * PAGE_SIZE) {
+                index++;
+                continue;
+            }
+            int visibleIndex = index - page * PAGE_SIZE;
             int rx = contentX;
-            int ry = contentY + index * (rowH + 5);
+            int ry = contentY + visibleIndex * (rowH + 5);
             index++;
-            if (ry + rowH > panelY + panelH - 14) continue;
+            if (ry + rowH > panelY + panelH - 34) continue;
             boolean on = enabled.contains(module.name());
             boolean hover = inside(mx, my, rx, ry, rowW, rowH);
             if (hover || on) {
@@ -141,6 +146,14 @@ public final class MoonMenuScreen extends Screen {
             GlassSurface.rounded(g, on ? tx + 14 : tx + 2, ry + 6, 9, 9, 5, 0xFFF3F6FC);
             g.text(font, "···", rx + rowW - 104, ry + 5, 0xFF9EADC1, false);
         }
+        int pages = Math.max(1, (countForGroup() + PAGE_SIZE - 1) / PAGE_SIZE);
+        int footerY = panelY + panelH - 24;
+        g.text(font, "PAGE " + (page + 1) + " / " + pages, contentX, footerY,
+                0xFF9AA9BF, false);
+        g.text(font, "‹", contentX + contentW - 42, footerY - 3,
+                page > 0 ? 0xFFEAF0FA : 0xFF59677D, false);
+        g.text(font, "›", contentX + contentW - 17, footerY - 3,
+                page + 1 < pages ? 0xFFEAF0FA : 0xFF59677D, false);
     }
 
     private void drawSettings(GuiGraphicsExtractor g, int mx, int my) {
@@ -165,17 +178,36 @@ public final class MoonMenuScreen extends Screen {
             int w = font.width(item) + 24;
             if (inside(mx, my, tabX, tabY, w, 26)) {
                 group = item;
+                page = 0;
                 selected = null;
                 return true;
             }
             tabX += w + 7;
         }
 
+        int pages = Math.max(1, (countForGroup() + PAGE_SIZE - 1) / PAGE_SIZE);
+        int footerY = panelY + panelH - 30;
+        if (inside(mx, my, contentX + contentW - 52, footerY, 24, 28) && page > 0) {
+            page--;
+            selected = null;
+            return true;
+        }
+        if (inside(mx, my, contentX + contentW - 27, footerY, 24, 28) && page + 1 < pages) {
+            page++;
+            selected = null;
+            return true;
+        }
+
         int index = 0;
         for (ModuleSpec module : ModuleSpec.ALL) {
             if (!module.group().equals(group)) continue;
+            if (index < page * PAGE_SIZE || index >= (page + 1) * PAGE_SIZE) {
+                index++;
+                continue;
+            }
+            int visibleIndex = index - page * PAGE_SIZE;
             int rx = contentX;
-            int ry = contentY + index * (rowH + 5);
+            int ry = contentY + visibleIndex * (rowH + 5);
             index++;
             if (!inside(mx, my, rx, ry, rowW, rowH)) continue;
             if (mx >= rx + rowW - 112 && mx < rx + rowW - 82) {
