@@ -27,9 +27,9 @@ import java.util.Map;
 
 /** The VLOX menu, drawn by hand. */
 public final class VloxScreen extends Screen {
-	private static final int ROW_HEIGHT = 84;
+	private static final int ROW_HEIGHT = 96;
 	private int cardHeight() {
-		return VloxConfig.flag(Features.MENU_COMPACT) ? 54 : ROW_HEIGHT;
+		return VloxConfig.flag(Features.MENU_COMPACT) ? 84 : ROW_HEIGHT;
 	}
 	private static final int ROW_GAP = 10;
 	private static final int GRID_COLUMNS = 4;
@@ -299,7 +299,7 @@ public final class VloxScreen extends Screen {
 
 			boolean toggleControl = (option != null && isBooleanOption(option)) || (option == null && feature.type == Feature.Type.TOGGLE);
 			int controlX = x + (cardWidth - controlWidth) / 2;
-			int controlY = y + cardHeight() - controlHeight - 9;
+			int controlY = y + cardHeight() - controlHeight - 7;
 			rows.add(new Row(feature, y, x, cardWidth, controlX, controlY, controlWidth, controlHeight));
 		}
 	}
@@ -461,11 +461,11 @@ public final class VloxScreen extends Screen {
 
 			String label = Ui.fit(this.font, feature.label, row.width() - 14);
 			int labelX = row.x() + (row.width() - this.font.width(label)) / 2;
-			Ui.text(graphics, this.font, label, labelX, row.y() + 45, Ui.TEXT);
+			Ui.text(graphics, this.font, label, labelX, row.y() + 43, Ui.TEXT);
 			if (VloxConfig.flag(Features.MENU_DESCRIPTIONS) && !VloxConfig.flag(Features.MENU_COMPACT)) {
 				String description = Ui.fit(this.font, feature.description, row.width() - 16);
 				int descX = row.x() + (row.width() - this.font.width(description)) / 2;
-				Ui.text(graphics, this.font, description, descX, row.y() + 58, Ui.MUTED);
+				Ui.text(graphics, this.font, description, descX, row.y() + 57, Ui.MUTED);
 			}
 
 			drawControl(graphics, row, mouseX, mouseY, dt);
@@ -509,13 +509,12 @@ public final class VloxScreen extends Screen {
 
 		int width = 34;
 		int height = 16;
-		int track = GLASS;
-
+		int track = on ? 0x786B829A : 0x50607182;
 		Ui.rounded(graphics, x, y, width, height, 8, track);
-
+		graphics.fill(x + 5, y + 2, x + width - 5, y + 3, 0x28FFFFFF);
 
 		int knobX = x + 3 + Math.round(current * (width - 6 - 10));
-		Ui.rounded(graphics, knobX, y + 3, 10, 10, 5, on ? 0xFFFFFFFF : 0xFF6C7A8C);
+		Ui.rounded(graphics, knobX, y + 3, 10, 10, 5, on ? 0xFFFFFFFF : 0xFFE0E7EF);
 	}
 
 	private void drawChip(GuiGraphicsExtractor graphics, int x, int y, int width, int height, String text,
