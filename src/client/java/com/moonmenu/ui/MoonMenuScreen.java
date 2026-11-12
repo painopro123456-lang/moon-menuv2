@@ -85,8 +85,10 @@ public final class MoonMenuScreen extends Screen {
             y += 36;
         }
 
-        g.text(font, countForGroup() + " MODULES", left, panelY + 236,
+        g.text(font, ModuleSpec.ALL.size() + " TOTAL MODULES", left, panelY + 236,
                 0xFF9AA9BF, false);
+        g.text(font, group + " • " + countForGroup(), left, panelY + 250,
+                0xFF71839D, false);
         g.fill(left, panelY + 256, sidebarRight, panelY + 257, 0x397F91AA);
         g.text(font, "MENU COLOR", left, panelY + panelH - 67, 0xFFDCE5F2, false);
         g.text(font, "CHANGE ACCENT", left, panelY + panelH - 51, 0xFF8797B0, false);
@@ -166,7 +168,7 @@ public final class MoonMenuScreen extends Screen {
             g.text(font, "···", rx + rowW - 104, ry + 6, 0xFF9EADC1, false);
         }
         int total = countForGroup();
-        g.text(font, "SCROLL • " + total + " MODULES", contentX, panelY + panelH - 25,
+        g.text(font, total + " " + group.toUpperCase() + " • " + ModuleSpec.ALL.size() + " TOTAL", contentX, panelY + panelH - 25,
                 0xFF9AA9BF, false);
         if (scrollOffset > 0) {
             g.text(font, "↑", contentX + contentW - 42, panelY + 90, 0xFFEAF0FA, false);
@@ -192,12 +194,12 @@ public final class MoonMenuScreen extends Screen {
 
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubled) {
+        layout();
         double mx = event.x(), my = event.y();
 
                 int pickerX = panelX + 22, pickerY = panelY + panelH - 35;
-        if (inside(mx, my, pickerX, pickerY - 3, 132, 15)) {
-            float hue = (float) Math.max(0, Math.min(1, (mx - pickerX) / 132.0));
-            MenuTheme.setAccent(hsv(hue, 1.0f, 1.0f));
+        if (inside(mx, my, pickerX - 5, pickerY - 7, 142, 23)) {
+            updateAccentFromPointer(mx, pickerX);
             return true;
         }
         int navY = panelY + 76;
@@ -237,6 +239,21 @@ public final class MoonMenuScreen extends Screen {
             }
         }
         return super.mouseClicked(event, doubled);
+    }
+
+    @Override
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
+        int pickerX = panelX + 22, pickerY = panelY + panelH - 35;
+        if (inside(mouseX, mouseY, pickerX - 5, pickerY - 7, 142, 23)) {
+            updateAccentFromPointer(mouseX, pickerX);
+            return true;
+        }
+        return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
+    }
+
+    private void updateAccentFromPointer(double mouseX, int pickerX) {
+        float hue = (float) Math.max(0.0, Math.min(1.0, (mouseX - pickerX) / 132.0));
+        MenuTheme.setAccent(hsv(hue, 1.0f, 1.0f));
     }
 
     @Override
