@@ -18,8 +18,7 @@ public final class MoonMenuClient implements ClientModInitializer {
                 Identifier.fromNamespaceAndPath("moonmenu", "controls"));
         openMenu = KeyMappingHelper.registerKeyMapping(new KeyMapping(
                 "key.moonmenu.open",
-                net.minecraft.client.input.KeyEvent.Type.KEYSYM == null
-                        ? null : com.mojang.blaze3d.platform.InputConstants.Type.KEYSYM,
+                com.mojang.blaze3d.platform.InputConstants.Type.KEYSYM,
                 GLFW.GLFW_KEY_RIGHT_SHIFT,
                 category));
 
