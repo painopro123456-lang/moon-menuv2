@@ -42,6 +42,7 @@ public final class MoonMenuScreen extends Screen {
         layout();
         drawAtmosphere(g);
         drawMoonColumn(g);
+        drawColorWheel(g);
         drawControls(g, mouseX, mouseY);
         if (selected != null) drawSettings(g, mouseX, mouseY);
         super.extractRenderState(g, mouseX, mouseY, delta);
@@ -95,6 +96,47 @@ public final class MoonMenuScreen extends Screen {
         g.text(font, "NIGHT IN YOUR HUD", left, panelY + panelH - 27, 0xFF8797B0, false);
     }
 
+
+    private void drawColorWheel(GuiGraphicsExtractor g) {
+        int x = panelX + 54;
+        int y = panelY + panelH - 104;
+        int radius = 25;
+        for (int py = -radius; py <= radius; py++) {
+            for (int px = -radius; px <= radius; px++) {
+                float distance = (float) Math.sqrt(px * px + py * py);
+                if (distance > radius) continue;
+                float hue = (float) ((Math.atan2(py, px) / (Math.PI * 2.0) + 1.0) % 1.0);
+                float saturation = Math.min(1.0f, distance / radius);
+                g.fill(x + px, y + py, x + px + 1, y + py + 1,
+                        hsv(hue, saturation, 1.0f));
+            }
+        }
+        GlassSurface.rounded(g, x - 4, y - 4, 8, 8, 4, MenuTheme.accent());
+        GlassSurface.rounded(g, x - 2, y - 2, 4, 4, 2, 0xFFF7F8FC);
+        g.text(font, "MENU COLOR", panelX + 91, y - 8, 0xFFDCE5F2, false);
+        g.text(font, "PICK A SHADE", panelX + 91, y + 8, 0xFF8797B0, false);
+    }
+
+    private static int hsv(float hue, float saturation, float value) {
+        float h = (hue - (float) Math.floor(hue)) * 6.0f;
+        int sector = (int) h;
+        float fraction = h - sector;
+        float p = value * (1.0f - saturation);
+        float q = value * (1.0f - fraction * saturation);
+        float t = value * (1.0f - (1.0f - fraction) * saturation);
+        float red, green, blue;
+        switch (sector % 6) {
+            case 0 -> { red = value; green = t; blue = p; }
+            case 1 -> { red = q; green = value; blue = p; }
+            case 2 -> { red = p; green = value; blue = t; }
+            case 3 -> { red = p; green = q; blue = value; }
+            case 4 -> { red = t; green = p; blue = value; }
+            default -> { red = value; green = p; blue = q; }
+        }
+        return 0xFF000000 | ((int) (red * 255) << 16)
+                | ((int) (green * 255) << 8) | (int) (blue * 255);
+    }
+
     private void drawControls(GuiGraphicsExtractor g, int mx, int my) {
         int x = contentX;
         g.text(font, "THE NIGHT SHIFT", x, panelY + 27, 0xFFF0F4FC, false);
@@ -108,11 +150,11 @@ public final class MoonMenuScreen extends Screen {
             boolean hover = inside(mx, my, tabX, tabY, w, 26);
             if (active || hover) {
                 GlassSurface.rounded(g, tabX, tabY, w, 26, 9,
-                        active ? 0x579EACC6 : 0x2BDAE5F4);
+                        active ? MenuTheme.accentWithAlpha(0x65) : 0x2BDAE5F4);
             }
             g.text(font, item, tabX + 12, tabY + 8,
                     active ? 0xFFF4F7FC : 0xFF9AA9BF, false);
-            if (active) g.fill(tabX + 12, tabY + 23, tabX + w - 12, tabY + 24, 0xB9DCE8F7);
+            if (active) g.fill(tabX + 12, tabY + 23, tabX + w - 12, tabY + 24, MenuTheme.accentWithAlpha(0xD0));
             tabX += w + 7;
         }
 
@@ -132,7 +174,7 @@ public final class MoonMenuScreen extends Screen {
             boolean hover = inside(mx, my, rx, ry, rowW, rowH);
             if (hover || on) {
                 GlassSurface.rounded(g, rx, ry, rowW, rowH, 7,
-                        on ? 0x4D9AAFCB : 0x328093B0);
+                        on ? MenuTheme.accentWithAlpha(0x55) : 0x328093B0);
             } else {
                 GlassSurface.rounded(g, rx, ry, rowW, rowH, 7, 0x1E9AAAC2);
             }
@@ -142,7 +184,7 @@ public final class MoonMenuScreen extends Screen {
                     on ? 0xFFDCE8F7 : 0xFF8998AF, false);
             int tx = rx + rowW - 38;
             GlassSurface.rounded(g, tx, ry + 5, 25, 12, 7,
-                    on ? 0xB7C9D9F0 : 0x53677891);
+                    on ? MenuTheme.accentWithAlpha(0xD0) : 0x53677891);
             GlassSurface.rounded(g, on ? tx + 14 : tx + 2, ry + 6, 9, 9, 5, 0xFFF3F6FC);
             g.text(font, "···", rx + rowW - 104, ry + 5, 0xFF9EADC1, false);
         }
@@ -173,6 +215,15 @@ public final class MoonMenuScreen extends Screen {
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubled) {
         double mx = event.x(), my = event.y();
+
+        int wheelX = panelX + 54, wheelY = panelY + panelH - 104;
+        double wheelDx = mx - wheelX, wheelDy = my - wheelY;
+        if (wheelDx * wheelDx + wheelDy * wheelDy <= 25 * 25) {
+            float hue = (float) ((Math.atan2(wheelDy, wheelDx) / (Math.PI * 2.0) + 1.0) % 1.0);
+            float saturation = (float) Math.min(1.0, Math.sqrt(wheelDx * wheelDx + wheelDy * wheelDy) / 25.0);
+            MenuTheme.setAccent(hsv(hue, saturation, 1.0f));
+            return true;
+        }
         int tabX = contentX, tabY = panelY + 78;
         for (String item : GROUPS) {
             int w = font.width(item) + 24;
