@@ -52,10 +52,10 @@ public final class MoonMenuScreen extends Screen {
 
     private void drawAtmosphere(GuiGraphicsExtractor g) {
         GlassSurface.rounded(g, panelX + 4, panelY + 8, panelW, panelH, 20, 0x65000000);
-        GlassSurface.rounded(g, panelX, panelY, panelW, panelH, 20, 0xC9141B2B);
-        GlassSurface.rounded(g, panelX + 1, panelY + 1, panelW - 2, panelH - 2, 19, 0x321D2A40);
+        GlassSurface.rounded(g, panelX, panelY, panelW, panelH, 20, MenuTheme.tint(0xC9141B2B, 0.28f));
+        GlassSurface.rounded(g, panelX + 1, panelY + 1, panelW - 2, panelH - 2, 19, MenuTheme.tint(0x321D2A40, 0.38f));
         // A restrained rim highlight replaces the old hard vertical divider.
-        g.fill(panelX + 22, panelY + 1, panelX + panelW - 22, panelY + 2, 0x48DCE8F7);
+        g.fill(panelX + 22, panelY + 1, panelX + panelW - 22, panelY + 2, MenuTheme.accentWithAlpha(0x90));
         int[][] stars = {{31,34},{92,75},{180,51},{225,103},{44,312},{198,365},{panelW-34,42},{panelW-62,panelH-38}};
         for (int[] star : stars) {
             int sx = panelX + star[0], sy = panelY + star[1];
@@ -66,7 +66,7 @@ public final class MoonMenuScreen extends Screen {
     private void drawSidebar(GuiGraphicsExtractor g) {
         int left = panelX + 22;
         int sidebarRight = panelX + 156;
-        g.text(font, "MOON MENU", left, panelY + 22, 0xFFF0F4FC, false);
+        g.text(font, "MOON MENU", left, panelY + 22, MenuTheme.accent(), false);
         g.text(font, "PVP CLIENT", left, panelY + 39, 0xFF8F9DB4, false);
         g.fill(left, panelY + 58, sidebarRight, panelY + 59, 0x397F91AA);
 
@@ -81,7 +81,7 @@ public final class MoonMenuScreen extends Screen {
                         MenuTheme.accentWithAlpha(0xE0));
             }
             g.text(font, item, left + 7, y + 5,
-                    active ? 0xFFF1F5FC : 0xFF9AA9BF, false);
+                    active ? MenuTheme.accent() : 0xFF9AA9BF, false);
             y += 36;
         }
 
@@ -151,9 +151,9 @@ public final class MoonMenuScreen extends Screen {
             boolean hover = inside(mx, my, rx, ry, rowW, rowH);
             if (hover || on) {
                 GlassSurface.rounded(g, rx + 2, ry + 2, rowW - 4, rowH - 4, 7,
-                        on ? MenuTheme.accentWithAlpha(0x55) : 0x328093B0);
+                        on ? MenuTheme.accentWithAlpha(0x70) : MenuTheme.tint(0x328093B0, 0.22f));
             } else {
-                GlassSurface.rounded(g, rx + 2, ry + 2, rowW - 4, rowH - 4, 7, 0x1E9AAAC2);
+                GlassSurface.rounded(g, rx + 2, ry + 2, rowW - 4, rowH - 4, 7, MenuTheme.tint(0x1E9AAAC2, 0.18f));
             }
             g.text(font, fit(module.name(), rowW - 160), rx + 13, ry + 3,
                     0xFFEAF0FA, false);
@@ -183,9 +183,9 @@ public final class MoonMenuScreen extends Screen {
         int x = panelX + panelW - w - 18;
         int y = panelY + panelH - h - 18;
         GlassSurface.rounded(g, x + 3, y + 5, w, h, 14, 0x90000000);
-        GlassSurface.rounded(g, x, y, w, h, 14, 0xF0212B3E);
-        g.fill(x + 16, y + 1, x + w - 16, y + 2, 0x55DCE8F7);
-        g.text(font, "MODULE DETAILS", x + 15, y + 15, 0xFF9EADC1, false);
+        GlassSurface.rounded(g, x, y, w, h, 14, MenuTheme.tint(0xF0212B3E, 0.32f));
+        g.fill(x + 16, y + 1, x + w - 16, y + 2, MenuTheme.accentWithAlpha(0xD0));
+        g.text(font, "MODULE DETAILS", x + 15, y + 15, MenuTheme.accent(), false);
         g.text(font, selected.name(), x + 15, y + 36, 0xFFF0F4FC, false);
         g.text(font, fit(selected.description(), w - 30), x + 15, y + 56, 0xFFB2BED0, false);
         g.text(font, "CLICK THE MODULE TO TOGGLE", x + 15, y + 91, 0xFF8998AF, false);
