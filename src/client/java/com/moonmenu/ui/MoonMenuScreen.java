@@ -15,7 +15,7 @@ public final class MoonMenuScreen extends Screen {
     private ModuleSpec selected;
     private int panelX, panelY, panelW, panelH;
     private int contentX, contentY, contentW;
-    private int rowW, rowH = 58;
+    private int rowW, rowH = 22;
 
     public MoonMenuScreen() {
         super(Component.literal("Moon Menu"));
@@ -34,7 +34,7 @@ public final class MoonMenuScreen extends Screen {
         contentX = panelX + 258;
         contentY = panelY + 146;
         contentW = panelW - 282;
-        rowW = (contentW - 12) / 2;
+        rowW = contentW;
     }
 
     @Override
@@ -105,35 +105,27 @@ public final class MoonMenuScreen extends Screen {
         int index = 0;
         for (ModuleSpec module : ModuleSpec.ALL) {
             if (!module.group().equals(group)) continue;
-            int col = index % 2, row = index / 2;
-            int rx = contentX + col * (rowW + 12);
-            int ry = contentY + row * (rowH + 9);
+            int rx = contentX;
+            int ry = contentY + index * (rowH + 5);
             index++;
-            if (ry + rowH > panelY + panelH - 20) continue;
+            if (ry + rowH > panelY + panelH - 14) continue;
             boolean on = enabled.contains(module.name());
             boolean hover = inside(mx, my, rx, ry, rowW, rowH);
-            GlassSurface.rounded(g, rx, ry + 3, rowW, rowH, 12, 0x30000000);
-            GlassSurface.rounded(g, rx, ry, rowW, rowH, 12,
-                    on ? 0x4D9AAFCB : hover ? 0x398093B0 : 0x241D2B40);
             if (hover || on) {
-                GlassSurface.rounded(g, rx + 1, ry + 1, rowW - 2, 1, 1,
-                        on ? 0x70DCE8F7 : 0x35DCE8F7);
+                GlassSurface.rounded(g, rx, ry, rowW, rowH, 7,
+                        on ? 0x4D9AAFCB : 0x328093B0);
+            } else {
+                GlassSurface.rounded(g, rx, ry, rowW, rowH, 7, 0x1E9AAAC2);
             }
-            GlassSurface.rounded(g, rx + 12, ry + 12, 32, 32, 11,
-                    on ? 0x78DCE8F7 : 0x459AAAC2);
-            String glyph = module.glyph();
-            g.text(font, glyph, rx + 12 + (32 - font.width(glyph)) / 2,
-                    ry + 23, 0xFFE5EDF9, false);
-            g.text(font, fit(module.name(), rowW - 91), rx + 53, ry + 15,
+            g.text(font, fit(module.name(), rowW - 112), rx + 12, ry + 7,
                     0xFFEAF0FA, false);
-            g.text(font, on ? "ACTIVE" : "INACTIVE", rx + 53, ry + 33,
-                    on ? 0xFFD5E3F4 : 0xFF8998AF, false);
-
-            int tx = rx + rowW - 37;
-            GlassSurface.rounded(g, tx, ry + 21, 25, 12, 7,
+            g.text(font, on ? "ON" : "OFF", rx + rowW - 79, ry + 7,
+                    on ? 0xFFDCE8F7 : 0xFF8998AF, false);
+            int tx = rx + rowW - 38;
+            GlassSurface.rounded(g, tx, ry + 5, 25, 12, 7,
                     on ? 0xB7C9D9F0 : 0x53677891);
-            GlassSurface.rounded(g, on ? tx + 14 : tx + 2, ry + 22, 9, 9, 5, 0xFFF3F6FC);
-            g.text(font, "···", rx + rowW - 23, ry + 3, 0xFF9EADC1, false);
+            GlassSurface.rounded(g, on ? tx + 14 : tx + 2, ry + 6, 9, 9, 5, 0xFFF3F6FC);
+            g.text(font, "···", rx + rowW - 104, ry + 5, 0xFF9EADC1, false);
         }
     }
 
@@ -168,12 +160,11 @@ public final class MoonMenuScreen extends Screen {
         int index = 0;
         for (ModuleSpec module : ModuleSpec.ALL) {
             if (!module.group().equals(group)) continue;
-            int col = index % 2, row = index / 2;
-            int rx = contentX + col * (rowW + 12);
-            int ry = contentY + row * (rowH + 9);
+            int rx = contentX;
+            int ry = contentY + index * (rowH + 5);
             index++;
             if (!inside(mx, my, rx, ry, rowW, rowH)) continue;
-            if (mx >= rx + rowW - 30 || my <= ry + 11) {
+            if (mx >= rx + rowW - 112 && mx < rx + rowW - 82) {
                 selected = module;
             } else if (!enabled.add(module.name())) {
                 enabled.remove(module.name());
