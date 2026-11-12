@@ -89,7 +89,7 @@ public final class ModuleRuntime {
 
     private static void renderHud(net.minecraft.client.gui.GuiGraphicsExtractor graphics) {
         Minecraft client = Minecraft.getInstance();
-        if (client.player == null || client.level == null || client.options.hideGui) return;
+        if (client.player == null || client.level == null) return;
 
         int y = 8;
         if (isEnabled("FPS")) {
@@ -129,7 +129,7 @@ public final class ModuleRuntime {
             }
         }
         if (isEnabled("World Time")) {
-            long dayTime = client.level.getDayTime() % 24000L;
+            long dayTime = client.level.getLevelData().getDayTime() % 24000L;
             long hours = (dayTime / 1000L + 6L) % 24L;
             long minutes = (dayTime % 1000L) * 60L / 1000L;
             y = line(graphics, client, String.format("WORLD TIME  %02d:%02d", hours, minutes), y);
