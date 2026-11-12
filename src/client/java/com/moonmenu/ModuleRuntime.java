@@ -22,6 +22,7 @@ public final class ModuleRuntime {
     private ModuleRuntime() {}
 
     public static void initialize() {
+        HudLayout.load();
         HudElementRegistry.addLast(
                 Identifier.fromNamespaceAndPath("moonmenu", "module_hud"),
                 (graphics, deltaTracker) -> renderHud(graphics)
@@ -349,7 +350,8 @@ public final class ModuleRuntime {
 
     private static int line(net.minecraft.client.gui.GuiGraphicsExtractor graphics,
                             Minecraft client, String value, int y) {
-        graphics.text(client.font, value, 8, y, 0xFFEAF0FA, true);
+        String id = value.contains("  ") ? value.substring(0, value.indexOf("  ")) : value;
+        HudLayout.render(graphics, client, id, value, y);
         return y + 11;
     }
 }
